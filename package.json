@@ -1,0 +1,57 @@
+{
+  "_from": "mqtt-client-node",
+  "_id": "mqtt-client-node@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha512-/dnlCXHakk4FKUG7UbiFxZ/+csbvxh4umM3S28I6QzRiau21LUOuzOPpDsLG7fxl79FnynL8tSP0fg+zVfDq/Q==",
+  "_location": "/mqtt-client-node",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "mqtt-client-node",
+    "name": "mqtt-client-node",
+    "escapedName": "mqtt-client-node",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/mqtt-client-node/-/mqtt-client-node-1.0.0.tgz",
+  "_shasum": "91d349fa5a97bfccaef7b21aa11f176b687394d3",
+  "_spec": "mqtt-client-node",
+  "_where": "/home/fx",
+  "author": {
+    "name": "fx"
+  },
+  "bugs": {
+    "url": "https://github.com/czjs2/mqtt-client-node/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "lodash": "^4.17.4",
+    "mqtt": "^2.13.0"
+  },
+  "deprecated": false,
+  "description": "",
+  "homepage": "https://github.com/czjs2/mqtt-client-node#readme",
+  "keywords": [
+    "mqtt",
+    "client",
+    "node"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "mqtt-client-node",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/czjs2/mqtt-client-node.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
