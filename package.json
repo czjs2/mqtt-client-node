@@ -1,6 +1,6 @@
 {
   "_from": "mqtt-client-node",
-  "_id": "mqtt-client-node@1.0.0",
+  "_id": "mqtt-client-node@2.0.0",
   "_inBundle": false,
   "_integrity": "sha512-/dnlCXHakk4FKUG7UbiFxZ/+csbvxh4umM3S28I6QzRiau21LUOuzOPpDsLG7fxl79FnynL8tSP0fg+zVfDq/Q==",
   "_location": "/mqtt-client-node",
@@ -53,5 +53,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.0"
+  "version": "2.0.0"
 }
