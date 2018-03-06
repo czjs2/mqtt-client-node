@@ -12,25 +12,15 @@ class node extends EventEmitter {
 
         let sysChannels = ['$iot','$circle'];
 
-        let type = ['sys','app','iot'];
-        let pubsub = {
-            sys:{
-                notify:'pub',
-                update:'sub'
-            }
-        };
-
-        this.pubs = [];
-        this.subs = [];
         this.appToken = appToken;
         this.appScrect = appScrect;
         this.channelList = {};
         this.mqttClient = null;
 
-        _.each(sysChannels,(item)=>{
+        _.each(sysChannels,(item) => {
             this.channelList[item] = {
-                '$update':(payload) => {this.sendBroadcast(item, '$update', payload.attribute, payload.payload)},
-                '$notify':(payload) => {this.sendBroadcast(item, '$notify', payload.attribute, payload.payload)}
+                '$update':(data) => {this.broadcastParser(data.targetToken,item,'$update',data.attribute,data.payload)},
+                '$notify':(data) => {this.broadcastParser(data.targetToken,item,'$notify',data.attribute,data.payload)}
             };
         });
     }
@@ -61,6 +51,7 @@ class node extends EventEmitter {
                     case '$update':
                     case '$notify':
                         this.channelList[channel][cmd]({
+                            targetToken: targetToken,
                             attribute: attribute,
                             payload: msg.payload
                         });
@@ -87,52 +78,26 @@ class node extends EventEmitter {
         })
     }
 
-    initParser(channel,cmd,parser){
-        this.channelList[channel][cmd] = parser;
-    }
-
-    getUUID(){
-        return Math.random().toString(36).substr(2, 8);
-    }
-
-    sendRequest(target, channel, cmd, attribute, payload, options) {
-        return new P((resolve, reject) => {
-            let uuid = this.getUUID();
-
-            let to = () => {
-                this.removeAllListeners(uuid);
-                reject({reason:'timeout'});
-            };
-
-            this.on(uuid,(payload) => {
-                if(timer){
-                    clearTimeout(timer);
-                }
-
-                this.removeAllListeners(uuid);
-                resolve(payload);
+    broadcastParser(targetToken, channel, cmd, attribute, payload) {
+        if (targetToken && channel && cmd && attribute) {
+            let uuid = targetToken+channel+cmd;
+            this.emit(uuid, {
+                targetToken: targetToken,
+                channel: channel,
+                cmd: cmd,
+                attribute: attribute,
+                payload: payload
             });
-            let timer = setTimeout(to,options.timeout||5000);
-
-            let topic = `/${this.appToken}/${target}/${channel}/${cmd}`;
-            if (channel == '$iot') {
-                topic += `/${payload.iotId}/${attribute}/${uuid}`;
+            this[channel] = {};
+            this[channel][cmd] = {
+                on: (callback) => {
+                    this.on(uuid,(payload) => {
+                        callback(payload);
+                    });
+                }
             }
-            else {
-                topic += `/${uuid}`;
-            }
-            this.mqttClient.publish(topic, JSON.stringify({payload:payload}), options);
-
-        })
-    };
-
-    sendBroadcast(channel, cmd, attribute, payload, options) {
-        let topic = `/${this.appToken}/${this.appToken}/${channel}/${cmd}`;
-        if (channel == '$iot') {
-            topic += `/${payload.iotId}/${attribute}`;
         }
-        this.mqttClient.publish(topic, JSON.stringify({payload:payload}), options);
-    };
+    }
 }
 
 module.exports = node;
