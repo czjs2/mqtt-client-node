@@ -9,20 +9,13 @@ class node extends EventEmitter {
 
     constructor(appToken, appScrect) {
         super();
-
-        let sysChannels = ['$iot','$circle'];
+        this.sysChannels = ['$iot','$circle'];
 
         this.appToken = appToken;
         this.appScrect = appScrect;
         this.channelList = {};
         this.mqttClient = null;
-
-        _.each(sysChannels,(item) => {
-            this.channelList[item] = {
-                '$update':(data) => {this.broadcastParser(data.targetToken,item,'$update',data.attribute,data.payload)},
-                '$notify':(data) => {this.broadcastParser(data.targetToken,item,'$notify',data.attribute,data.payload)}
-            };
-        });
+        this.subscribePatterns = [`/${appToken}/#`];
     }
 
     connect(address, options) {
@@ -32,9 +25,10 @@ class node extends EventEmitter {
                 let topicParser = topic.split('/');
 
                 let targetToken = topicParser[0];
+                let srcToken = topicParser[1];
                 let channel = topicParser[2];
                 let cmd = topicParser[3];
-                let attribute = topicParser[5];
+                let messageId = topicParser[4] || '';
 
                 let script = new vm.Script(" msg = " + payload.toString());
                 let obj = {};
@@ -47,55 +41,41 @@ class node extends EventEmitter {
 
                 let msg = obj.msg || {};
 
-                switch (cmd) {
-                    case '$update':
-                    case '$notify':
-                        this.channelList[channel][cmd]({
-                            targetToken: targetToken,
-                            attribute: attribute,
-                            payload: msg.payload
-                        });
-                        break;
-                    case '$req':
-                    case '$rreq':
-                        this.emit(messageId, {
-                            targetToken: targetToken,
-                            channel: channel,
-                            cmd: cmd,
-                            attribute: attribute,
-                            payload: msg.payload
-                        });
-                        break;
-                    default:
-                        break;
+                let data = {
+                    tar: targetToken,
+                    src: srcToken,
+                    channel: channel,
+                    cmd: cmd,
+                    messageId: messageId,
+                    payload: msg.payload
+                };
+
+                if (cmd == '$resp' || cmd == '$rresp') {
+                    this.emit(messageId, this.topicParser(data, topic));
                 }
+                this.emit(channel, this.topicParser(data, topic));
+                this.emit(cmd, this.topicParser(data, topic));
+                this.emit(channel+'/'+cmd, this.topicParser(data, topic));
             });
 
             this.mqttClient.on('connect',() => {
-                this.mqttClient.subscribe(this.subs);
+                this.mqttClient.subscribe(this.subscribePatterns);
                 resolve(this);
             });
         })
     }
 
-    broadcastParser(targetToken, channel, cmd, attribute, payload) {
-        if (targetToken && channel && cmd && attribute) {
-            let uuid = targetToken+channel+cmd;
-            this.emit(uuid, {
-                targetToken: targetToken,
-                channel: channel,
-                cmd: cmd,
-                attribute: attribute,
-                payload: payload
-            });
-            this[channel] = {};
-            this[channel][cmd] = {
-                on: (callback) => {
-                    this.on(uuid,(payload) => {
-                        callback(payload);
-                    });
-                }
-            }
+    topicParser(data, topic) {
+        let topicParser = topic.split('/');
+        switch (topicParser[2]) {
+            case '$iot':
+                data.iotId = topicParser[5];
+                data.attribute = topicParser[6];
+                return data;
+                break;
+            default:
+                return {};
+                break;
         }
     }
 }

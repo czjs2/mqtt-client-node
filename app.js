@@ -5,15 +5,21 @@ class App extends BaseNode {
 
     constructor(appToken, appScrect) {
         super(appToken, appScrect);
-        this.subs = [
-            `/${appToken}/+/$iot/$resp/+/+/+`,
-            `/${appToken}/+/$iot/$notify/+/+`
+        this.subscribePatterns = [
+            `/${appToken}/+/+/$resp/#`,
+            `/${appToken}/+/+/$rreq/#`,
+            `/${appToken}/+/+/$notify/+/+`
         ];
     }
 
-    req(target, attribute, payload) {
+    req(target, channel, attribute, payload) {
         let common = new Common(this);
-        return common.sendRequest(target, '$iot', '$req', attribute, payload);
+        return common.sendRequest(target, channel, '$req', attribute, payload);
+    }
+
+    rresp(target, channel, attribute, messageId, payload) {
+        let common = new Common(this);
+        common.sendResponse(target, channel, '$rresp', attribute, messageId, payload);
     }
 
     update(channel, attribute, payload) {
