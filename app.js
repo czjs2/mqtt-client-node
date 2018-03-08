@@ -12,19 +12,23 @@ class App extends BaseNode {
         ];
     }
 
-    req(target, channel, id, attribute, payload) {
+    req(target, channel, params, payload) {
         let common = new Common(this);
-        return common.sendRequest(this.appToken, target, channel, '$req', id, attribute, payload);
+        let customTopic = this.topic.combination(channel, params);
+        return common.sendRequest(this.appToken, target, channel, '$req', customTopic, payload);
     }
 
-    rresp(target, channel, id, attribute, messageId, payload) {
+    rresp(target, channel, params, payload) {
         let common = new Common(this);
-        common.sendResponse(this.appToken, target, channel, '$rresp', id, attribute, messageId, payload);
+        let customTopic = this.topic.combination(channel, params);
+        customTopic += `/${params.messageId}`;
+        common.sendBroadcast(this.appToken, target, channel, '$rresp', customTopic, payload);
     }
 
-    update(channel, id, attribute, payload) {
+    update(channel, params, payload) {
         let common = new Common(this);
-        common.sendBroadcast(channel, '$update', id, attribute, payload);
+        let customTopic = this.topic.combination(channel, params);
+        common.sendBroadcast(this.appToken, this.appToken, channel, '$update', customTopic, payload);
     };
 }
 

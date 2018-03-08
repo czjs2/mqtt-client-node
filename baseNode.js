@@ -4,17 +4,17 @@ const vm = require('vm');
 const mqtt = require('mqtt');
 const _ = require('lodash');
 const P = require('bluebird');
+const Topic = require('./topic');
 
 class node extends EventEmitter {
 
     constructor(appToken, appScrect) {
         super();
-        this.sysChannels = ['$iot','$circle'];
-
         this.appToken = appToken;
         this.appScrect = appScrect;
         this.mqttClient = null;
         this.subscribePatterns = [`/${appToken}/#`];
+        this.topic = new Topic();
     }
 
     connect(address, options) {
@@ -23,8 +23,8 @@ class node extends EventEmitter {
             this.mqttClient.on('message',(topic,payload) => {
                 let topicParser = topic.split('/');
 
-                let srcToken = topicParser[1];
-                let targetToken = topicParser[2];
+                let targetToken = topicParser[1];
+                let srcToken = topicParser[2];
                 let channel = topicParser[3];
                 let cmd = topicParser[4];
 
@@ -40,20 +40,23 @@ class node extends EventEmitter {
                 let msg = obj.msg || {};
 
                 let data = {
-                    src: srcToken,
                     tar: targetToken,
+                    src: srcToken,
                     channel: channel,
                     cmd: cmd,
                     payload: msg.payload
                 };
 
+                _.pullAt(topicParser,[0,1,2,3,4]);
+                let result = this.topic.parser(channel, topicParser);
+                _.extend(data, result);
+
                 if (cmd == '$resp' || cmd == '$rresp') {
-                    let result = this.topicParser(data, topic);
-                    this.emit(result.messageId, result);
+                    this.emit(result.messageId, data);
                 }
-                this.emit(channel, this.topicParser(data, topic));
-                this.emit(cmd, this.topicParser(data, topic));
-                this.emit(channel+'/'+cmd, this.topicParser(data, topic));
+                this.emit(channel, data);
+                this.emit(cmd, data);
+                this.emit(channel+'/'+cmd, data);
             });
 
             this.mqttClient.on('connect',() => {
@@ -61,26 +64,6 @@ class node extends EventEmitter {
                 resolve(this);
             });
         })
-    }
-
-    topicParser(data, topic) {
-        let topicParser = topic.split('/');
-        switch (topicParser[3]) {
-            case '$iot':
-                data.iotId = topicParser[5];
-                data.attribute = topicParser[6];
-                data.messageId = topicParser[7] || '';
-                return data;
-                break;
-            case '$circle':
-                data.circleId = topicParser[5];
-                data.messageId = topicParser[6] || '';
-                return data;
-                break;
-            default:
-                return {};
-                break;
-        }
     }
 }
 

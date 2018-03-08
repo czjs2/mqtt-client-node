@@ -12,19 +12,23 @@ class Service extends BaseNode {
         ];
     }
 
-    rreq(src, target, channel, id, attribute, payload) {
+    rreq(target, src, channel, params, payload) {
         let common = new Common(this);
-        return common.sendRequest(src, target, channel, '$rreq', id, attribute, payload);
+        let customTopic = this.topic.combination(channel, params);
+        return common.sendRequest(target, src, channel, '$rreq', customTopic, payload);
     }
 
-    resp(src, target, channel, id, attribute, messageId, payload) {
+    resp(target, src, channel, params, payload) {
         let common = new Common(this);
-        common.sendResponse(src, target, channel, '$resp', id, attribute, messageId, payload);
+        let customTopic = this.topic.combination(channel, params);
+        customTopic += `/${params.messageId}`;
+        common.sendBroadcast(target, src, channel, '$resp', customTopic, payload);
     }
 
-    notify(channel, id, attribute, payload) {
+    notify(channel, params, payload) {
         let common = new Common(this);
-        common.sendBroadcast(channel, '$notify', id, attribute, payload);
+        let customTopic = this.topic.combination(channel, params);
+        common.sendBroadcast(this.appToken, this.appToken, channel, '$notify', customTopic, payload);
     };
 }
 
