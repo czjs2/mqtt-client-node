@@ -19,7 +19,7 @@ class node extends EventEmitter {
 
     connect(address, options) {
         return new P((resolve,reject) => {
-            this.mqttClient = mqtt.connect(address);
+            this.mqttClient = mqtt.connect(address, {username: this.appToken, password: this.appScrect});
             this.mqttClient.on('message',(topic,payload) => {
                 let topicParser = topic.split('/');
 
@@ -56,7 +56,7 @@ class node extends EventEmitter {
                 }
                 this.emit(channel, data);
                 this.emit(cmd, data);
-                this.emit(channel+'/'+cmd, data);
+                this.emit(channel+'-'+cmd, data);
             });
 
             this.mqttClient.on('connect',() => {

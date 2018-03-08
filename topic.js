@@ -9,7 +9,13 @@ class Topic {
         };
     }
 
-    //topic解析器
+    /**
+     * topic解析器.
+     *
+     * @param {string} channel eg.'$iot'
+     * @param {array} topicParser eg.['aaa', 'bbb']
+     * @return {object}. eg.{iotId: 'aaa', attribute: 'bbb'}
+     */
     parser(channel, topicParser) {
         let rule = this.topicRule[channel];
         let result = {};
@@ -22,7 +28,13 @@ class Topic {
         return result;
     }
 
-    //topic组合
+    /**
+     * topic组合.
+     *
+     * @param {string} channel eg.'$iot'
+     * @param {object} payload eg.{iotId: 'aaa', attribute: 'bbb'}
+     * @return {string}. eg.'/aaa/bbb'
+     */
     combination(channel, payload) {
         let rule = this.topicRule[channel];
         let result = '';

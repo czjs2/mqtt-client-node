@@ -1,3 +1,7 @@
 # mqtt-client-node
-mqtt-client for sendrequest and handle response
 
+## Installation
+
+```sh
+npm install mqtt-client-node --save
+```
