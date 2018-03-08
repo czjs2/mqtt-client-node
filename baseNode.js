@@ -13,7 +13,6 @@ class node extends EventEmitter {
 
         this.appToken = appToken;
         this.appScrect = appScrect;
-        this.channelList = {};
         this.mqttClient = null;
         this.subscribePatterns = [`/${appToken}/#`];
     }
@@ -24,11 +23,10 @@ class node extends EventEmitter {
             this.mqttClient.on('message',(topic,payload) => {
                 let topicParser = topic.split('/');
 
-                let targetToken = topicParser[0];
                 let srcToken = topicParser[1];
-                let channel = topicParser[2];
-                let cmd = topicParser[3];
-                let messageId = topicParser[4] || '';
+                let targetToken = topicParser[2];
+                let channel = topicParser[3];
+                let cmd = topicParser[4];
 
                 let script = new vm.Script(" msg = " + payload.toString());
                 let obj = {};
@@ -36,22 +34,22 @@ class node extends EventEmitter {
                     script.runInNewContext(obj);
                 }
                 catch (e){
-
+                    console.log(e);
                 }
 
                 let msg = obj.msg || {};
 
                 let data = {
-                    tar: targetToken,
                     src: srcToken,
+                    tar: targetToken,
                     channel: channel,
                     cmd: cmd,
-                    messageId: messageId,
                     payload: msg.payload
                 };
 
                 if (cmd == '$resp' || cmd == '$rresp') {
-                    this.emit(messageId, this.topicParser(data, topic));
+                    let result = this.topicParser(data, topic);
+                    this.emit(result.messageId, result);
                 }
                 this.emit(channel, this.topicParser(data, topic));
                 this.emit(cmd, this.topicParser(data, topic));
@@ -67,10 +65,16 @@ class node extends EventEmitter {
 
     topicParser(data, topic) {
         let topicParser = topic.split('/');
-        switch (topicParser[2]) {
+        switch (topicParser[3]) {
             case '$iot':
                 data.iotId = topicParser[5];
                 data.attribute = topicParser[6];
+                data.messageId = topicParser[7] || '';
+                return data;
+                break;
+            case '$circle':
+                data.circleId = topicParser[5];
+                data.messageId = topicParser[6] || '';
                 return data;
                 break;
             default:

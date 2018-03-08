@@ -1,5 +1,5 @@
-import BaseNode from './baseNode';
-import Common from 'common';
+const BaseNode = require('./baseNode');
+const Common  = require('./common');
 
 class Service extends BaseNode {
 
@@ -12,18 +12,20 @@ class Service extends BaseNode {
         ];
     }
 
-    rreq(target, channel, attribute, payload) {
+    rreq(src, target, channel, id, attribute, payload) {
         let common = new Common(this);
-        return common.sendRequest(target, channel, '$rreq', attribute, payload);
+        return common.sendRequest(src, target, channel, '$rreq', id, attribute, payload);
     }
 
-    resp(target, channel, attribute, messageId, payload) {
+    resp(src, target, channel, id, attribute, messageId, payload) {
         let common = new Common(this);
-        common.sendResponse(target, channel, '$resp', attribute, messageId, payload);
+        common.sendResponse(src, target, channel, '$resp', id, attribute, messageId, payload);
     }
 
-    notify(channel, attribute, payload) {
+    notify(channel, id, attribute, payload) {
         let common = new Common(this);
-        common.sendBroadcast(channel, '$notify', attribute, payload);
+        common.sendBroadcast(channel, '$notify', id, attribute, payload);
     };
 }
+
+module.exports = Service;

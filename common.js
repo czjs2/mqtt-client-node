@@ -1,3 +1,5 @@
+const P = require('bluebird');
+
 class Common {
 
     constructor(mqttNode) {
@@ -8,7 +10,7 @@ class Common {
         return Math.random().toString(36).substr(2, 8);
     }
 
-    sendRequest(target, channel, cmd, attribute, payload, options) {
+    sendRequest(src, target, channel, cmd, id, attribute, payload, options = {}) {
         return new P((resolve, reject) => {
             let uuid = this.getUUID();
 
@@ -27,33 +29,36 @@ class Common {
             });
             let timer = setTimeout(to,options.timeout||5000);
 
-            let topic = `/${this.mqttNode.appToken}/${target}/${channel}/${cmd}`;
+            let topic = `/${src}/${target}/${channel}/${cmd}`;
             if (channel == '$iot') {
-                topic += `/${payload.iotId}/${attribute}/${uuid}`;
+                topic += `/${id}/${attribute}/${uuid}`;
             }
             else {
-                topic += `/${uuid}`;
+                topic += `/${id}/${uuid}`;
             }
             this.mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options);
 
         })
     };
 
-    sendResponse(target, channel, cmd, attribute, messageId, payload, options) {
-        let topic = `/${this.mqttNode.appToken}/${target}/${channel}/${cmd}`;
+    sendResponse(src, target, channel, cmd, id, attribute, messageId, payload, options = {}) {
+        let topic = `/${src}/${target}/${channel}/${cmd}`;
         if (channel == '$iot') {
-            topic += `/${payload.iotId}/${attribute}/${messageId}`;
+            topic += `/${id}/${attribute}/${messageId}`;
         }
         else {
-            topic += `/${messageId}`;
+            topic += `/${id}/${messageId}`;
         }
         this.mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options);
     };
 
-    sendBroadcast(channel, cmd, attribute, payload, options) {
+    sendBroadcast(channel, cmd, id, attribute, payload, options = {}) {
         let topic = `/${this.mqttNode.appToken}/${this.mqttNode.appToken}/${channel}/${cmd}`;
         if (channel == '$iot') {
-            topic += `/${payload.iotId}/${attribute}`;
+            topic += `/${id}/${attribute}`;
+        }
+        else {
+            topic += `/${id}`;
         }
         this.mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options);
     };
