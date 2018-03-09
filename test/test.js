@@ -81,7 +81,7 @@ describe('server', function() {
 //         });
 //
 //         service1.notify({
-//             target: app1.appToken,
+//             tar: app1.appToken,
 //             src: app1.appToken,
 //             channel: '$iot',
 //             params: {iotId: message.iotId, attribute: message.attribute},
@@ -92,7 +92,7 @@ describe('server', function() {
 //     it('notify(service -> more app)', function(done) {
 //         service1.on('$update',(payload) => {
 //             service1.notify({
-//                 target: payload.tar,
+//                 tar: payload.tar,
 //                 src: service1.appToken,
 //                 channel: '$iot',
 //                 params: {iotId: payload.iotId, attribute: payload.attribute},
@@ -153,15 +153,15 @@ describe('req->rreq->rresp->resp', function() {
     it('req->rreq->rresp->resp', function(done) {
         service1.on('$req',(payload) => {
             service1.rreq({
-                target: payload.target,
+                tar: payload.tar,
                 src: payload.src,
                 channel: '$iot',
                 params: {iotId: payload.params.iotId, attribute: payload.params.attribute},
                 payload: payload.payload
             }).then((result) => {
                 service1.resp({
-                    target: result.src,
-                    src: result.target,
+                    tar: result.src,
+                    src: result.tar,
                     channel: '$iot',
                     params: {iotId: result.params.iotId, attribute: result.params.attribute, messageId: payload.params.messageId},
                     payload: result.payload
@@ -171,7 +171,7 @@ describe('req->rreq->rresp->resp', function() {
 
         app2.on('$rreq',(payload) => {
             app2.rresp({
-                target: payload.src,
+                src: payload.src,
                 channel: '$iot',
                 params: payload.params,
                 payload: payload.payload
@@ -182,12 +182,12 @@ describe('req->rreq->rresp->resp', function() {
         // for(var i=0;i<100;i++)
         // {
             app1.req({
-                target: app2.appToken,
+                tar: app2.appToken,
                 channel: '$iot',
                 params: {iotId: message.iotId, attribute: message.attribute},
                 payload: {random: Math.random().toString(36)}
             }).then((payload) => {
-                if (payload.target == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
+                if (payload.tar == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                     // count += 1;
                     // if (count == 99) {
                         done();

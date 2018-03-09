@@ -18,48 +18,48 @@ class Service extends BaseNode {
     /**
      * service监听req，发送rreq.
      *
-     * @param {string} target eg.'aaaa'
+     * @param {string} tar eg.'aaaa'
      * @param {string} src eg.'bbbb'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    rreq({target, src, channel, params, payload}) {
+    rreq({tar, src, channel, params, payload}) {
         channel = channel || this.channel;
-        let error = this.validate({target, src, channel , params});
+        let error = this.validate({tar, src, channel , params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendRequest(this, src, target, channel, '$rreq', customTopic, payload);
+        return sender.sendRequest(this, src, tar, channel, '$rreq', customTopic, payload);
     }
 
     /**
      * service监听rresq,发送resp响应.
      *
-     * @param {string} target eg.'aaaa'
+     * @param {string} tar eg.'aaaa'
      * @param {string} src eg.'bbbb'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    resp({target, src, channel, params, payload}) {
+    resp({tar, src, channel, params, payload}) {
         channel = channel || this.channel;
-        let error = this.validate({target, src, channel, params});
+        let error = this.validate({tar, src, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${params.messageId}`;
-        return sender.sendBroadcast(this, target, src, channel, '$resp', customTopic, payload);
+        return sender.sendBroadcast(this, tar, src, channel, '$resp', customTopic, payload);
     }
 
     /**
      * service发送notify通知.
      *
-     * @param {string} target eg.'aaaa'
+     * @param {string} tar eg.'aaaa'
      * @param {string} src eg.'bbbb'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
@@ -67,14 +67,14 @@ class Service extends BaseNode {
      * @param {object} options eg.{retain: false}
      * @return {Promise}.
      */
-    notify({target, src, channel, params, payload, options}) {
+    notify({tar, src, channel, params, payload, options}) {
         channel = channel || this.channel;
-        let error = this.validate({target, src, channel, params});
+        let error = this.validate({tar, src, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendBroadcast(this, target, src, channel, '$notify', customTopic, payload, options);
+        return sender.sendBroadcast(this, tar, src, channel, '$notify', customTopic, payload, options);
     };
 
 

@@ -18,40 +18,40 @@ class App extends BaseNode {
     /**
      * 发送req请求到service.
      *
-     * @param {string} target eg.'aaaa'
+     * @param {string} tar eg.'aaaa'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    req({target, channel, params, payload}) {
+    req({tar, channel, params, payload}) {
         channel = channel || this.channel;
-        let error = this.validate({src:"#",target, channel, params});
+        let error = this.validate({src:"#",tar, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendRequest(this, this.appToken, target, channel, '$req', customTopic, payload);
+        return sender.sendRequest(this, this.appToken, tar, channel, '$req', customTopic, payload);
     }
 
     /**
      * 发送rresp请求到service.
      *
-     * @param {string} target eg.'aaaa'
+     * @param {string} tar eg.'aaaa'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    rresp({target, channel, params, payload}) {
+    rresp({src, channel, params, payload}) {
         channel = channel || this.channel;
-        let error = this.validate({src:"#",target, channel, params});
+        let error = this.validate({tar:"#",src, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${params.messageId}`;
-        return sender.sendBroadcast(this, this.appToken, target, channel, '$rresp', customTopic, payload);
+        return sender.sendBroadcast(this, this.appToken, src, channel, '$rresp', customTopic, payload);
     }
 
     /**
@@ -65,7 +65,7 @@ class App extends BaseNode {
      */
     update({channel, params, payload, options}) {
         channel = channel || this.channel;
-        let error = this.validate({target: this.appToken,src:"#", channel, params});
+        let error = this.validate({tar: this.appToken,src:"#", channel, params});
         if (error) {
             return P.reject(error);
         }

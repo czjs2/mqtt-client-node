@@ -17,11 +17,11 @@ class node extends EventEmitter {
         this.topic = new Topic();
     }
 
-    //验证target, src, channel, params的值是否是空的
-    validate({target, src, channel, params}) {
+    //验证tar, src, channel, params的值是否是空的
+    validate({tar, src, channel, params}) {
         let error = '';
-        if (!target) {
-            error = 'target is undefined';
+        if (!tar) {
+            error = 'tar is undefined';
             return error;
         }
         if (!src) {
@@ -44,7 +44,7 @@ class node extends EventEmitter {
             this.mqttClient.on('message',(topic,payload) => {
                 let topicParser = topic.split('/');
 
-                let targetToken = topicParser[1];
+                let tarToken = topicParser[1];
                 let srcToken = topicParser[2];
                 let channel = topicParser[3];
                 let cmd = topicParser[4];
@@ -61,7 +61,7 @@ class node extends EventEmitter {
                 let msg = obj.msg || {};
 
                 let data = {
-                    target: targetToken,
+                    tar: tarToken,
                     src: srcToken,
                     channel: channel,
                     cmd: cmd,

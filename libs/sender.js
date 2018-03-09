@@ -2,7 +2,7 @@ const P = require('bluebird');
 
 class Common {
 
-    sendRequest(mqttNode, appToken, target, channel, cmd, customTopic, payload, options = {}) {
+    sendRequest(mqttNode, appToken, tar, channel, cmd, customTopic, payload, options = {}) {
         return new P((resolve, reject) => {
             let uuid = Math.random().toString(36).substr(2, 8);
 
@@ -21,7 +21,7 @@ class Common {
             });
             let timer = setTimeout(to,options.timeout||5000);
 
-            let topic = `/${appToken}/${target}/${channel}/${cmd}`;
+            let topic = `/${appToken}/${tar}/${channel}/${cmd}`;
             topic += customTopic;
             topic += `/${uuid}`;
 
@@ -33,9 +33,9 @@ class Common {
         })
     };
 
-    sendBroadcast(mqttNode, appToken, target, channel, cmd, customTopic, payload, options = {}) {
+    sendBroadcast(mqttNode, appToken, tar, channel, cmd, customTopic, payload, options = {}) {
         return new P((resolve, reject) => {
-            let topic = `/${appToken}/${target}/${channel}/${cmd}`;
+            let topic = `/${appToken}/${tar}/${channel}/${cmd}`;
             topic += customTopic;
             mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options, (err) => {
                 if (err) {
