@@ -1,6 +1,6 @@
 const mosca = require('mosca');
-const Service = require('./service');
-const App = require('./app');
+const Service = require('../libs/service');
+const App = require('../libs/app');
 const _ = require('lodash');
 const P = require('bluebird');
 

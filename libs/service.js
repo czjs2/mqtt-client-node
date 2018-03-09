@@ -1,7 +1,7 @@
-const BaseNode = require('./baseNode');
-const common  = require('./common');
 const P = require('bluebird');
 const _ = require('lodash');
+const common  = require('./common');
+const BaseNode = require('./baseNode');
 
 class Service extends BaseNode {
 
