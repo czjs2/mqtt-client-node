@@ -160,8 +160,8 @@ describe('req->rreq->rresp->resp', function() {
                 payload: payload.payload
             }).then((result) => {
                 service1.resp({
-                    tar: result.src,
-                    src: result.tar,
+                    tar: result.tar,
+                    src: result.src,
                     channel: '$iot',
                     params: {iotId: result.params.iotId, attribute: result.params.attribute},
                     messageId: payload.messageId,
