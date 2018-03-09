@@ -61,7 +61,7 @@ class node extends EventEmitter {
                 let msg = obj.msg || {};
 
                 let data = {
-                    tar: targetToken,
+                    target: targetToken,
                     src: srcToken,
                     channel: channel,
                     cmd: cmd,
