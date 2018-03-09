@@ -8,13 +8,34 @@ const Topic = require('./topic');
 
 class node extends EventEmitter {
 
-    constructor(appToken, appScrect) {
+    constructor(appToken, appScrect,subscribePatterns) {
         super();
         this.appToken = appToken;
         this.appScrect = appScrect;
         this.mqttClient = null;
-        this.subscribePatterns = [`/${appToken}/#`];
+        this.subscribePatterns = subscribePatterns || [`/${appToken}/#`];
         this.topic = new Topic();
+    }
+
+    //验证target, src, channel, params的值是否是空的
+    validate({target, src, channel, params}) {
+        let error = '';
+        if (!target) {
+            error = 'target is undefined';
+            return error;
+        }
+        if (!src) {
+            error = 'src is undefined';
+            return error;
+        }
+        if (!channel) {
+            error = 'channel is undefined';
+            return error;
+        }
+        if (_.isEmpty(params)) {
+            error = 'params is empty';
+        }
+        return error;
     }
 
     connect(address, options) {

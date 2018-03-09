@@ -1,17 +1,17 @@
 const BaseNode = require('./baseNode');
-const common = require('./common');
+const sender = require('./sender');
 const P = require('bluebird');
 const _ = require('lodash');
 
 class App extends BaseNode {
 
     constructor(appToken, appScrect, channel) {
-        super(appToken, appScrect);
-        this.subscribePatterns = [
+        let subscribePatterns  = [
             `/${appToken}/+/${channel || '+'}/$resp/#`,
             `/${appToken}/+/${channel || '+'}/$rreq/#`,
-            `/${appToken}/+/${channel || '+'}/$notify/+/+`
+            `/${appToken}/+/${channel || '+'}/$notify/#`
         ];
+        super(appToken, appScrect,subscribePatterns);
         this.channel = channel;
     }
 
@@ -25,12 +25,13 @@ class App extends BaseNode {
      * @return {Promise}.
      */
     req({target, channel, params, payload}) {
-        let error = this.validate({target, channel, params});
+        channel = channel || this.channel;
+        let error = this.validate({src:"#",target, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return common.sendRequest(this, this.appToken, target, channel, '$req', customTopic, payload);
+        return sender.sendRequest(this, this.appToken, target, channel, '$req', customTopic, payload);
     }
 
     /**
@@ -43,13 +44,14 @@ class App extends BaseNode {
      * @return {Promise}.
      */
     rresp({target, channel, params, payload}) {
-        let error = this.validate({target, channel, params});
+        channel = channel || this.channel;
+        let error = this.validate({src:"#",target, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${params.messageId}`;
-        return common.sendBroadcast(this, this.appToken, target, channel, '$rresp', customTopic, payload);
+        return sender.sendBroadcast(this, this.appToken, target, channel, '$rresp', customTopic, payload);
     }
 
     /**
@@ -62,30 +64,15 @@ class App extends BaseNode {
      * @return {Promise}.
      */
     update({channel, params, payload, options}) {
-        let error = this.validate({target: this.appToken, channel, params});
+        channel = channel || this.channel;
+        let error = this.validate({target: this.appToken,src:"#", channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return common.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, options);
+        return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, options);
     };
 
-    //验证target, channel, params的值是否是空的
-    validate({target, channel, params}) {
-        let error = '';
-        if (!target) {
-            error = 'target is undefined';
-            return error;
-        }
-        if (!channel) {
-            error = 'channel is undefined';
-            return error;
-        }
-        if (_.isEmpty(params)) {
-            error = 'params is empty';
-        }
-        return error;
-    }
 }
 
 module.exports = App;
