@@ -16,16 +16,16 @@ class Topic {
      * @param {array} topicParser eg.['aaa', 'bbb']
      * @return {object}. eg.{iotId: 'aaa', attribute: 'bbb'}
      */
-    parser(channel, topicParser) {
-        let rule = this.topicRule[channel];
-        let result = {};
+    parser(data, topicParser) {
+        let rule = this.topicRule[data.channel];
+        data.params = {};
 
         _.each(rule,(item, index) => {
-            result[item] = topicParser[index];
+            data.params[item] = topicParser[index];
         });
-        result.messageId = rule ? topicParser[rule.length] : undefined;
+        data.messageId = rule ? topicParser[rule.length] : undefined;
 
-        return result;
+        return data;
     }
 
     /**

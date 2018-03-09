@@ -45,14 +45,14 @@ class Service extends BaseNode {
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    resp({tar, src, channel, params, payload}) {
+    resp({tar, src, channel, params, messageId, payload}) {
         channel = channel || this.channel;
         let error = this.validate({tar, src, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        customTopic += `/${params.messageId}`;
+        customTopic += `/${messageId}`;
         return sender.sendBroadcast(this, tar, src, channel, '$resp', customTopic, payload);
     }
 

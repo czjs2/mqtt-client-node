@@ -69,15 +69,14 @@ class node extends EventEmitter {
                 };
 
                 _.pullAt(topicParser,[0,1,2,3,4]);
-                let result = this.topic.parser(channel, topicParser);
-                _.extend(data, {params: result});
+                let result = this.topic.parser(data, topicParser);
 
                 if (cmd == '$resp' || cmd == '$rresp') {
-                    this.emit(result.messageId, data);
+                    this.emit(result.messageId, result);
                 }
-                this.emit(channel, data);
-                this.emit(cmd, data);
-                this.emit(channel+'-'+cmd, data);
+                this.emit(channel, result);
+                this.emit(cmd, result);
+                this.emit(channel+'-'+cmd, result);
             });
 
             this.mqttClient.on('connect',() => {

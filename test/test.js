@@ -163,7 +163,8 @@ describe('req->rreq->rresp->resp', function() {
                     tar: result.src,
                     src: result.tar,
                     channel: '$iot',
-                    params: {iotId: result.params.iotId, attribute: result.params.attribute, messageId: payload.params.messageId},
+                    params: {iotId: result.params.iotId, attribute: result.params.attribute},
+                    messageId: payload.messageId,
                     payload: result.payload
                 })
             });
@@ -174,6 +175,7 @@ describe('req->rreq->rresp->resp', function() {
                 src: payload.src,
                 channel: '$iot',
                 params: payload.params,
+                messageId: payload.messageId,
                 payload: payload.payload
             });
         });
