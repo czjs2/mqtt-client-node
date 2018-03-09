@@ -32,7 +32,7 @@ class Service extends BaseNode {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendRequest(this, target, src, channel, '$rreq', customTopic, payload);
+        return sender.sendRequest(this, src, target, channel, '$rreq', customTopic, payload);
     }
 
     /**

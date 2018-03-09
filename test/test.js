@@ -153,8 +153,8 @@ describe('req->rreq->rresp->resp', function() {
     it('req->rreq->rresp->resp', function(done) {
         service1.on('$req',(payload) => {
             service1.rreq({
-                target: payload.src,
-                src: payload.tar,
+                target: payload.tar,
+                src: payload.src,
                 channel: '$iot',
                 params: {iotId: payload.params.iotId, attribute: payload.params.attribute},
                 payload: payload.payload
@@ -178,9 +178,9 @@ describe('req->rreq->rresp->resp', function() {
             });
         });
 
-        let count = 0;
-        for(var i=0;i<100;i++)
-        {
+        // let count = 0;
+        // for(var i=0;i<100;i++)
+        // {
             app1.req({
                 target: app2.appToken,
                 channel: '$iot',
@@ -188,15 +188,15 @@ describe('req->rreq->rresp->resp', function() {
                 payload: {random: Math.random().toString(36)}
             }).then((payload) => {
                 if (payload.tar == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
-                    count += 1;
-                    if (count == 99) {
+                    // count += 1;
+                    // if (count == 99) {
                         done();
-                    }
+                    // }
                 }
                 else {
                     done(new Error('req failed'));
                 }
             });
-        }
+        // }
     });
 });
