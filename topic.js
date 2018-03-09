@@ -29,7 +29,7 @@ class Topic {
     }
 
     /**
-     * topic组合.
+     * topic拼接.
      *
      * @param {string} channel eg.'$iot'
      * @param {object} payload eg.{iotId: 'aaa', attribute: 'bbb'}

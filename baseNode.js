@@ -49,7 +49,7 @@ class node extends EventEmitter {
 
                 _.pullAt(topicParser,[0,1,2,3,4]);
                 let result = this.topic.parser(channel, topicParser);
-                _.extend(data, result);
+                _.extend(data, {params: result});
 
                 if (cmd == '$resp' || cmd == '$rresp') {
                     this.emit(result.messageId, data);

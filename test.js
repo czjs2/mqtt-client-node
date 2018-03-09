@@ -52,7 +52,7 @@ describe('server', function() {
 describe('update', function() {
     it('update(app -> service)', function(done) {
         service1.on('$update',(payload) => {
-            if (payload.tar == service1.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+            if (payload.tar == service1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                 done();
             }
             else {
@@ -72,7 +72,7 @@ describe('update', function() {
 describe('notify', function() {
     it('notify(service -> one app)', function(done) {
         app1.on('$notify',(payload) => {
-            if (payload.tar == app1.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+            if (payload.tar == service1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                 done();
             }
             else {
@@ -121,7 +121,7 @@ describe('notify', function() {
         });
 
         app1.on('$notify',(payload) => {
-            if (payload.tar == app1.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+            if (payload.tar == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                 console.log('notify app1 success');
             }
             else {
@@ -129,7 +129,7 @@ describe('notify', function() {
             }
         });
         app2.on('$notify',(payload) => {
-            if (payload.tar == app2.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+            if (payload.tar == app2.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                 console.log('notify app2 success');
             }
             else {
@@ -137,7 +137,7 @@ describe('notify', function() {
             }
         });
         app3.on('$notify',(payload) => {
-            if (payload.tar == app3.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+            if (payload.tar == app3.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                 console.log('notify app3 success');
             }
             else {
@@ -156,14 +156,14 @@ describe('req->rreq->rresp->resp', function() {
                 target: payload.src,
                 src: payload.tar,
                 channel: '$iot',
-                params: {iotId: payload.iotId, attribute: payload.attribute},
+                params: {iotId: payload.params.iotId, attribute: payload.params.attribute},
                 payload: payload.payload
             }).then((result) => {
                 service1.resp({
                     target: result.src,
                     src: result.tar,
                     channel: '$iot',
-                    params: {iotId: result.iotId, attribute: result.attribute, messageId: payload.messageId},
+                    params: {iotId: result.params.iotId, attribute: result.params.attribute, messageId: payload.params.messageId},
                     payload: result.payload
                 })
             });
@@ -173,7 +173,7 @@ describe('req->rreq->rresp->resp', function() {
             app2.rresp({
                 target: payload.src,
                 channel: '$iot',
-                params: {iotId: payload.iotId, attribute: payload.attribute, messageId: payload.messageId},
+                params: payload.params,
                 payload: payload.payload
             });
         });
@@ -187,7 +187,7 @@ describe('req->rreq->rresp->resp', function() {
                 params: {iotId: message.iotId, attribute: message.attribute},
                 payload: {random: Math.random().toString(36)}
             }).then((payload) => {
-                if (payload.tar == app1.appToken && payload.iotId == message.iotId && payload.attribute == message.attribute) {
+                if (payload.tar == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
                     count += 1;
                     if (count == 99) {
                         done();
