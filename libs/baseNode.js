@@ -44,8 +44,8 @@ class node extends EventEmitter {
             this.mqttClient.on('message',(topic,payload) => {
                 let topicParser = topic.split('/');
 
-                let tarToken = topicParser[1];
-                let srcToken = topicParser[2];
+                let src = topicParser[1];
+                let tar = topicParser[2];
                 let channel = topicParser[3];
                 let cmd = topicParser[4];
 
@@ -61,8 +61,8 @@ class node extends EventEmitter {
                 let msg = obj.msg || {};
 
                 let data = {
-                    tar: tarToken,
-                    src: srcToken,
+                    src: src,
+                    tar: tar,
                     channel: channel,
                     cmd: cmd,
                     payload: msg.payload

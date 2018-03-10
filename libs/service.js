@@ -32,7 +32,7 @@ class Service extends BaseNode {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendRequest(this, src, tar, channel, '$rreq', customTopic, payload);
+        return sender.sendRequest(this, tar, src, channel, '$rreq', customTopic, payload);
     }
 
     /**
@@ -53,7 +53,7 @@ class Service extends BaseNode {
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${messageId}`;
-        return sender.sendBroadcast(this, src, tar, channel, '$resp', customTopic, payload);
+        return sender.sendBroadcast(this, tar, src, channel, '$resp', customTopic, payload);
     }
 
     /**

@@ -43,15 +43,15 @@ class App extends BaseNode {
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
-    rresp({src, channel, params, messageId, payload}) {
+    rresp({tar, channel, params, messageId, payload}) {
         channel = channel || this.channel;
-        let error = this.validate({tar:"#",src, channel, params});
+        let error = this.validate({src:"#",tar, channel, params});
         if (error) {
             return P.reject(error);
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${messageId}`;
-        return sender.sendBroadcast(this, this.appToken, src, channel, '$rresp', customTopic, payload);
+        return sender.sendBroadcast(this, this.appToken, tar, channel, '$rresp', customTopic, payload);
     }
 
     /**
@@ -65,7 +65,7 @@ class App extends BaseNode {
      */
     update({channel, params, payload, options}) {
         channel = channel || this.channel;
-        let error = this.validate({tar: this.appToken,src:"#", channel, params});
+        let error = this.validate({tar: "#",src:"#", channel, params});
         if (error) {
             return P.reject(error);
         }
