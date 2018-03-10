@@ -39,7 +39,8 @@ class App extends BaseNode {
      *
      * @param {string} tar eg.'aaaa'
      * @param {string} channel eg.'$iot'
-     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
+     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
+     * @param {string} messageId eg.'aaa'
      * @param {object} payload eg.{}
      * @return {Promise}.
      */

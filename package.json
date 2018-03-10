@@ -19,6 +19,9 @@
     "lodash": "^4.17.4",
     "mqtt": "^2.13.0"
   },
+  "devDependencies": {
+    "mosca": "^2.7.0"
+  },
   "deprecated": false,
   "keywords": [
     "mqtt",

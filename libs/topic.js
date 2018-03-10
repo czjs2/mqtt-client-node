@@ -12,7 +12,7 @@ class Topic {
     /**
      * topic解析器.
      *
-     * @param {string} channel eg.'$iot'
+     * @param {object} data eg.{}
      * @param {array} topicParser eg.['aaa', 'bbb']
      * @return {object}. eg.{iotId: 'aaa', attribute: 'bbb'}
      */

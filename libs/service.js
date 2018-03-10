@@ -11,7 +11,7 @@ class Service extends BaseNode {
             `/+/+/${channel || '+'}/$rresp/#`,
             `/+/+/${channel || '+'}/$req/#`
         ];
-        super(appToken, appScrect ,subscribePatterns);
+        super(appToken, appScrect, subscribePatterns);
         this.channel = channel;
     }
 
@@ -41,7 +41,8 @@ class Service extends BaseNode {
      * @param {string} tar eg.'aaaa'
      * @param {string} src eg.'bbbb'
      * @param {string} channel eg.'$iot'
-     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
+     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
+     * @param {string} messageId eg.'aaa'
      * @param {object} payload eg.{}
      * @return {Promise}.
      */
@@ -62,7 +63,7 @@ class Service extends BaseNode {
      * @param {string} tar eg.'aaaa'
      * @param {string} src eg.'bbbb'
      * @param {string} channel eg.'$iot'
-     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb', messageId: 'aaa'}
+     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
      * @param {object} payload eg.{}
      * @param {object} options eg.{retain: false}
      * @return {Promise}.
@@ -76,8 +77,6 @@ class Service extends BaseNode {
         let customTopic = this.topic.combination(channel, params);
         return sender.sendBroadcast(this, tar, src, channel, '$notify', customTopic, payload, options);
     };
-
-
 }
 
 module.exports = Service;
