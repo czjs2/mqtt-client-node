@@ -73,7 +73,6 @@ class App extends BaseNode {
         let customTopic = this.topic.combination(channel, params);
         return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, options);
     };
-
 }
 
 module.exports = App;

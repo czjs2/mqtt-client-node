@@ -1,7 +1,20 @@
 const P = require('bluebird');
 
-class Common {
+class Sender {
 
+    /**
+     * 发送请求.
+     *
+     * @param {EventEmitter} mqttNode eg.'baseNode'
+     * @param {string} src eg.'appToken'
+     * @param {string} tar eg.'appToken'
+     * @param {string} channel eg.'$iot'
+     * @param {string} cmd eg.'$req'
+     * @param {string} customTopic eg.'/aaaa/bbbb'
+     * @param {object} payload eg.{}
+     * @param {object} options eg.{retain: false}
+     * @return {Promise}.
+     */
     sendRequest(mqttNode, src, tar, channel, cmd, customTopic, payload, options = {}) {
         return new P((resolve, reject) => {
             let uuid = Math.random().toString(36).substr(2, 8);
@@ -33,6 +46,19 @@ class Common {
         })
     };
 
+    /**
+     * 发送广播.
+     *
+     * @param {EventEmitter} mqttNode eg.'baseNode'
+     * @param {string} src eg.'appToken'
+     * @param {string} tar eg.'appToken'
+     * @param {string} channel eg.'$iot'
+     * @param {string} cmd eg.'$req'
+     * @param {string} customTopic eg.'/aaaa/bbbb'
+     * @param {object} payload eg.{}
+     * @param {object} options eg.{retain: false}
+     * @return {Promise}.
+     */
     sendBroadcast(mqttNode, src, tar, channel, cmd, customTopic, payload, options = {}) {
         return new P((resolve, reject) => {
             let topic = `/${src}/${tar}/${channel}/${cmd}`;
@@ -47,4 +73,4 @@ class Common {
     };
 }
 
-module.exports = new Common();
+module.exports = new Sender();

@@ -8,7 +8,7 @@ const Topic = require('./topic');
 
 class node extends EventEmitter {
 
-    constructor(appToken, appScrect,subscribePatterns) {
+    constructor(appToken, appScrect, subscribePatterns) {
         super();
         this.appToken = appToken;
         this.appScrect = appScrect;
@@ -17,7 +17,9 @@ class node extends EventEmitter {
         this.topic = new Topic();
     }
 
-    //验证tar, src, channel, params的值是否是空的
+    /**
+     * 验证器,验证tar, src, channel, params的值是否是空的
+     */
     validate({tar, src, channel, params}) {
         let error = '';
         if (!tar) {
@@ -38,6 +40,13 @@ class node extends EventEmitter {
         return error;
     }
 
+    /**
+     * 连接mqtt总线
+     *
+     * @param {string} address eg.'mqtt://localhost'
+     * @param {object} options eg.{}
+     * @return {Promise}.
+     */
     connect(address, options) {
         return new P((resolve,reject) => {
             this.mqttClient = mqtt.connect(address, {username: this.appToken, password: this.appScrect});
