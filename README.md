@@ -21,12 +21,13 @@ app.req({tar: 'tar_appToken', channel: '$iot', payload:{value: 'test'}}).then((r
 ```
 
 ## api
-app.req
-app.rresp
-app.update
-service.rreq
-service.resp
-service.notify
+* connect()
+* app.req()
+* app.rresp()
+* app.update()
+* service.rreq()
+* service.resp()
+* service.notify()
 
 ##License
 MIT
