@@ -8,7 +8,7 @@ npm install mqtt-client-node --save
 
 ## 例子
 ```javascript
-const App = require('../index').app;
+const App = require('mqtt-client-node').app;
 const app = new App('appToken','appScrect');
 
 app.connect('mqtt://localhost').then(() => {
@@ -29,5 +29,5 @@ app.req({tar: 'tar_appToken', channel: '$iot', payload:{value: 'test'}}).then((r
 * service.resp()
 * service.notify()
 
-##License
+## License
 MIT
