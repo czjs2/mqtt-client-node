@@ -1,36 +1,47 @@
 const mosca = require('mosca');
+const P = require('bluebird');
 const Service = require('../index').service;
 const App = require('../index').app;
-const _ = require('lodash');
-const P = require('bluebird');
 
-const service1 = new Service('aaaa1','bbbb1');
+const service = new Service('aaaa','bbbb');
 const app1 = new App('aaaa1','bbbb1');
 const app2 = new App('aaaa2','bbbb2');
-const app3 = new App('aaaa3','bbbb3');
+const gateway1 = new App('aaaaa1','bbbbb1');
+const gateway2 = new App('aaaaa1','bbbbb1');
 const message = {
-    iotId: 'aaaaa',
-    attribute: 'bbbbb',
+    iotId: 'asdfgh',
+    attribute: 'gggggg',
     payload: {
         value: Math.random().toString(36)
     }
 };
 
 describe('server', function() {
-    it('server start', function(done) {
+    it('localhost server start', function(done) {
         var server = new mosca.Server({});	//here we start mosca
         server.on('ready', () => {
             done();
         });
     });
+});
 
-    it('service1 connect', function(done) {
-        service1.connect('mqtt://localhost').then(() => {
+describe('service connect', function() {
+    it('service connect', function (done) {
+        service.connect('mqtt://localhost').then(() => {
             done();
+
+            service.on('$req',(result) => {
+                service.rreq(result).then((obj) => {
+                    obj.messageId = result.messageId;
+                    service.resp(obj);
+                });
+            });
         });
     });
+});
 
-    it('app1 connect', function(done) {
+describe('app connect', function() {
+    it('app1 connect', function (done) {
         app1.connect('mqtt://localhost').then(() => {
             done();
         });
@@ -41,26 +52,34 @@ describe('server', function() {
             done();
         });
     });
+});
 
-    it('app3 connect', function(done) {
-        app3.connect('mqtt://localhost').then(() => {
+describe('gateway connect', function() {
+    it('gateway1 connect', function(done) {
+        gateway1.connect('mqtt://localhost').then(() => {
+            done();
+        });
+    });
+
+    it('gateway2 connect', function(done) {
+        gateway2.connect('mqtt://localhost').then(() => {
             done();
         });
     });
 });
 
 describe('update', function() {
-    it('update(app -> service)', function(done) {
-        service1.on('$update',(payload) => {
-            if (payload.tar == service1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
+    it('update(gateway1 -> service)', function(done) {
+        service.on('$update',(result) => {
+            if (result.payload.value == message.payload.value) {
                 done();
             }
             else {
-                done(new Error('update failed'));
+                done(new Error('value is difference'));
             }
         });
 
-        app1.update({
+        gateway1.update({
             channel: '$iot',
             params: {iotId: message.iotId, attribute: message.attribute},
             payload: message.payload,
@@ -70,135 +89,120 @@ describe('update', function() {
 });
 
 describe('notify', function() {
-    it('notify(service -> one app)', function(done) {
-        app1.on('$notify',(payload) => {
-            if (payload.tar == service1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
+    it('notify(service -> app1)', function(done) {
+        app1.on('$notify',(result) => {
+            if (result.payload.value == message.payload.value) {
                 done();
             }
             else {
-                done(new Error('notify failed'));
+                done(new Error('value is difference'));
             }
         });
 
-        service1.notify({
+        service.notify({
             tar: app1.appToken,
-            src: app1.appToken,
+            src: service.appToken,
             channel: '$iot',
             params: {iotId: message.iotId, attribute: message.attribute},
             payload: message.payload,
             options: {}
         });
     });
-    it('notify(service -> more app)', function(done) {
-        service1.on('$update',(payload) => {
-            service1.notify({
-                tar: payload.tar,
-                src: service1.appToken,
-                channel: '$iot',
-                params: {iotId: payload.iotId, attribute: payload.attribute},
-                payload: payload.payload,
-                options: {}
-            });
-        });
 
-        app1.update({
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload,
-            options: {}
-        });
-        app2.update({
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload,
-            options: {}
-        });
-        app3.update({
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload,
-            options: {}
-        });
-
-        app1.on('$notify',(payload) => {
-            if (payload.tar == app1.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
-                console.log('notify app1 success');
+    it('notify(service -> app1 and app2)', function(done) {
+        app1.on('$notify',(result) => {
+            if (result.payload.value == message.payload.value) {
+                done();
             }
             else {
-                console.log('notify app1 failed');
+                done(new Error('value is difference'));
             }
         });
-        app2.on('$notify',(payload) => {
-            if (payload.tar == app2.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
-                console.log('notify app2 success');
+        app2.on('$notify',(result) => {
+            if (result.payload.value == message.payload.value) {
+                done();
             }
             else {
-                console.log('notify app2 failed');
-            }
-        });
-        app3.on('$notify',(payload) => {
-            if (payload.tar == app3.appToken && payload.params.iotId == message.iotId && payload.params.attribute == message.attribute) {
-                console.log('notify app3 success');
-            }
-            else {
-                console.log('notify app3 failed');
+                done(new Error('value is difference'));
             }
         });
 
-        done();
+        service.on('$update',(result) => {
+            if (result.payload.value == message.payload.value) {
+                service.notify({
+                    tar: result.payload.appToken,
+                    src: result.src,
+                    channel: '$iot',
+                    params: result.params,
+                    payload: result.payload,
+                    options: {}
+                });
+            }
+            else {
+                done(new Error('value is difference'));
+            }
+        });
+
+        gateway1.update({
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: {value: message.payload.value, appToken: app1.appToken},
+            options: {}
+        });
+        gateway2.update({
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: {value: message.payload.value, appToken: app2.appToken},
+            options: {}
+        });
     });
 });
 
 describe('req->rreq->rresp->resp', function() {
     it('req->rreq->rresp->resp', function(done) {
-        service1.on('$req',(payload) => {
-            service1.rreq({
-                tar: payload.tar,
-                src: payload.src,
-                channel: '$iot',
-                params: {iotId: payload.params.iotId, attribute: payload.params.attribute},
-                payload: payload.payload
-            }).then((result) => {
-                service1.resp({
-                    tar: result.tar,
-                    src: result.src,
-                    channel: '$iot',
-                    params: {iotId: result.params.iotId, attribute: result.params.attribute},
-                    messageId: payload.messageId,
-                    payload: result.payload
-                })
-            });
+        app2.on('$rreq',(result) => {
+            app2.rresp(result);
         });
 
-        app2.on('$rreq',(payload) => {
-            app2.rresp({
-                tar: payload.tar,
-                channel: '$iot',
-                params: payload.params,
-                messageId: payload.messageId,
-                payload: payload.payload
-            });
+        app1.req({
+            tar: app2.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            if (result.payload.value == message.payload.value) {
+                done();
+            }
+            else {
+                done(new Error('req failed'));
+            }
+        });
+    });
+
+    it('req->rreq->rresp->resp 100second', function(done) {
+        app2.on('$rreq',(result) => {
+            app2.rresp(result);
         });
 
-        // let count = 0;
-        // for(var i=0;i<100;i++)
-        // {
+        let count = 0;
+        for(var i=0;i<100;i++)
+        {
             app1.req({
                 tar: app2.appToken,
                 channel: '$iot',
                 params: {iotId: message.iotId, attribute: message.attribute},
                 payload: message.payload
-            }).then((payload) => {
-                if (payload.payload.value == message.payload.value) {
-                    // count += 1;
-                    // if (count == 99) {
+            }).then((result) => {
+                if (result.payload.value == message.payload.value) {
+                    count += 1;
+                    if (count == 99) {
                         done();
-                    // }
+                    }
                 }
                 else {
                     done(new Error('req failed'));
                 }
             });
-        // }
+        }
     });
 });
