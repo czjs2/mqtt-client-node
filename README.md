@@ -51,6 +51,8 @@ service.notify({tar: 'tar_appToken', src: 'src_appToken', channel: '$iot', paylo
 * <a href="#req"><code>app.<b>req()</b></code></a>
 * <a href="#rresp"><code>app.<b>rresp()</b></code></a>
 * <a href="#update"><code>app.<b>update()</b></code></a>
+* <a href="#event"><code>app.<b>event()</b></code></a>
+* <a href="#soeIotAttrs"><code>app.<b>soeIotAttrs()</b></code></a>
 * <a href="#rreq"><code>service.<b>rreq()</b></code></a>
 * <a href="#resp"><code>service.<b>resp()</b></code></a>
 * <a href="#notify"><code>service.<b>notify()</b></code></a>
@@ -82,6 +84,21 @@ app上报数据给service。
 * channel '$iot','$circle'
 * params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
 * payload 传输的数据体
+* options mqtt.publish配置，见[mqtt.publish()](https://github.com/mqttjs/MQTT.js#publish)
+
+<a name="event"></a>
+### app.event({channel, params, payload, options})
+app上报数据给service。
+* channel '$iot','$circle'
+* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* payload 传输的数据体
+* options mqtt.publish配置，见[mqtt.publish()](https://github.com/mqttjs/MQTT.js#publish)
+
+<a name="soeIotAttrs"></a>
+### app.soeIotAttrs({attrs, params, options})
+iot设备上报数据给service。
+* attrs {1: {type: 's', payload: 'aaa'}}
+* params {iotId: 'aaa'}
 * options mqtt.publish配置，见[mqtt.publish()](https://github.com/mqttjs/MQTT.js#publish)
 
 <a name="rreq"></a>

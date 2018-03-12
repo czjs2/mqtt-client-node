@@ -88,6 +88,34 @@ describe('update', function() {
     });
 });
 
+describe('soeIotAttrs', function() {
+    it('soeIotAttrs', function(done) {
+        service.on('$event',(result) => {
+            if (result.payload == 'bbb') {
+                done();
+            }
+            else {
+                done(new Error('payload is difference'));
+            }
+        });
+
+        app1.soeIotAttrs({
+            attrs: {
+                "1":{   //属性
+                    "type": "s", //数据类型 状态或是事件型
+                    payload: 'aaa'  //值内容
+                },
+                "2":{   //属性
+                    type: "e", //数据类型 状态或是事件型
+                    payload: 'bbb'  //值内容
+                },
+            },
+            params: {iotId: 'aaaa'},
+            options: {}
+        })
+    });
+});
+
 describe('notify', function() {
     it('notify(service -> app1)', function(done) {
         app1.on('$notify',(result) => {

@@ -8,6 +8,7 @@ class Service extends BaseNode {
     constructor(appToken, appScrect, channel) {
         let subscribePatterns = [
             `/+/+/${channel || '+'}/$update/#`,
+            `/+/+/${channel || '+'}/$event/#`,
             `/+/+/${channel || '+'}/$rresp/#`,
             `/+/+/${channel || '+'}/$req/#`
         ];

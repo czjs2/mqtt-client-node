@@ -73,6 +73,45 @@ class App extends BaseNode {
         let customTopic = this.topic.combination(channel, params);
         return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, options);
     };
+
+    /**
+     * 上报数据到service.
+     *
+     * @param {string} channel eg.'$iot'
+     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
+     * @param {object} payload eg.{}
+     * @param {object} options eg.{retain: false}
+     * @return {Promise}.
+     */
+    event({channel, params, payload, options}) {
+        channel = channel || this.channel;
+        let error = this.validate({tar: "#",src:"#", channel, params});
+        if (error) {
+            return P.reject(error);
+        }
+        let customTopic = this.topic.combination(channel, params);
+        return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$event', customTopic, payload, options);
+    };
+
+    /**
+     * iot设备上报数据到service.
+     *
+     * @param {string} attrs eg.{1: {type: 's', payload: 'aaa'}}
+     * @param {object} params eg.{iotId: 'aaa'}
+     * @param {object} payload eg.'aaa'
+     * @param {object} options eg.{retain: false}
+     * @return {Promise}.
+     */
+    soeIotAttrs({attrs, params, options}) {
+        let type = {
+            s: 'update',
+            e: 'event'
+        };
+
+        _.each(attrs, (item, key) => {
+            this[type[item.type]]({channel: '$iot', params: {iotId: params.iotId, attribute: key}, payload: item.payload, options});
+        });
+    };
 }
 
 module.exports = App;
