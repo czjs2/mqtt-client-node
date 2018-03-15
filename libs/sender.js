@@ -1,4 +1,5 @@
 const P = require('bluebird');
+const _ = require('lodash');
 
 class Sender {
 
@@ -24,13 +25,19 @@ class Sender {
                 reject({reason:'timeout'});
             };
 
-            mqttNode.on(uuid,(payload) => {
+            mqttNode.on(uuid,(result) => {
                 if(timer){
                     clearTimeout(timer);
                 }
 
                 mqttNode.removeAllListeners(uuid);
-                resolve(payload);
+
+                if (_.has(result.payload,'$error')) {
+                    reject(result.payload['$error']);
+                }
+                else {
+                    resolve(result);
+                }
             });
             let timer = setTimeout(to,options.timeout||5000);
 

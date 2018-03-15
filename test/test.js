@@ -29,13 +29,6 @@ describe('service connect', function() {
     it('service connect', function (done) {
         service.connect('mqtt://localhost').then(() => {
             done();
-
-            service.on('$req',(result) => {
-                service.rreq(result).then((obj) => {
-                    obj.messageId = result.messageId;
-                    service.resp(obj);
-                });
-            });
         });
     });
 });
@@ -70,6 +63,7 @@ describe('gateway connect', function() {
 
 describe('update', function() {
     it('update(gateway1 -> service)', function(done) {
+        service.removeAllListeners('$update');
         service.on('$update',(result) => {
             if (result.payload.value == message.payload.value) {
                 done();
@@ -90,6 +84,7 @@ describe('update', function() {
 
 describe('soeIotAttrs', function() {
     it('soeIotAttrs', function(done) {
+        service.removeAllListeners('$event');
         service.on('$event',(result) => {
             if (result.payload == 'bbb') {
                 done();
@@ -118,6 +113,7 @@ describe('soeIotAttrs', function() {
 
 describe('notify', function() {
     it('notify(service -> app1)', function(done) {
+        app1.removeAllListeners('$notify');
         app1.on('$notify',(result) => {
             if (result.payload.value == message.payload.value) {
                 done();
@@ -138,6 +134,9 @@ describe('notify', function() {
     });
 
     it('notify(service -> app1 and app2)', function(done) {
+        app1.removeAllListeners('$notify');
+        app2.removeAllListeners('$notify');
+        service.removeAllListeners('$update');
         app1.on('$notify',(result) => {
             if (result.payload.value == message.payload.value) {
                 done();
@@ -187,7 +186,103 @@ describe('notify', function() {
 });
 
 describe('req->rreq->rresp->resp', function() {
+    it('req success', function(done) {
+        service.removeAllListeners('$req');
+        service.on('$req',(result) => {
+            service.resp(result);
+        });
+
+        app1.req({
+            tar: app1.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            if (result.payload.value == message.payload.value) {
+                done();
+            }
+            else {
+                done(new Error('req failed'));
+            }
+        }).catch((e) => {
+            done(new Error(e));
+        });
+    });
+
+    it('req error', function(done) {
+        service.removeAllListeners('$req');
+        service.on('$req',(result) => {
+            result.payload = {$error: 'error'};
+            service.resp(result);
+        });
+
+        app1.req({
+            tar: app1.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            done(new Error('must error'));
+        }).catch((e) => {
+            done();
+        });
+    });
+
+    it('rreq success', function(done) {
+        app2.removeAllListeners('$rreq');
+        app2.on('$rreq',(result) => {
+            app2.rresp(result);
+        });
+
+        service.rreq({
+            tar: app2.appToken,
+            src: service.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            if (result.payload.value == message.payload.value) {
+                done();
+            }
+            else {
+                done(new Error('req failed'));
+            }
+        }).catch((e) => {
+            done(new Error(e));
+        });
+    });
+
+    it('rreq error', function(done) {
+        app2.removeAllListeners('$rreq');
+        app2.on('$rreq',(result) => {
+            result.payload = {$error: 'error'};
+            app2.rresp(result);
+        });
+
+        service.rreq({
+            tar: app2.appToken,
+            src: service.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            done(new Error('must error'));
+        }).catch((e) => {
+            done();
+        });
+    });
+
     it('req->rreq->rresp->resp', function(done) {
+        app2.removeAllListeners('$rreq');
+        service.removeAllListeners('$req');
+
+        service.on('$req',(result) => {
+            service.rreq(result).then((obj) => {
+                obj.messageId = result.messageId;
+                service.resp(obj);
+            });
+        });
+
         app2.on('$rreq',(result) => {
             app2.rresp(result);
         });
@@ -204,10 +299,22 @@ describe('req->rreq->rresp->resp', function() {
             else {
                 done(new Error('req failed'));
             }
+        }).catch((e) => {
+            console.log(e);
         });
     });
 
     it('req->rreq->rresp->resp 100second', function(done) {
+        app2.removeAllListeners('$rreq');
+        service.removeAllListeners('$req');
+
+        service.on('$req',(result) => {
+            service.rreq(result).then((obj) => {
+                obj.messageId = result.messageId;
+                service.resp(obj);
+            });
+        });
+
         app2.on('$rreq',(result) => {
             app2.rresp(result);
         });
@@ -232,5 +339,37 @@ describe('req->rreq->rresp->resp', function() {
                 }
             });
         }
+    });
+});
+
+describe('finish', function() {
+    it('service finish', function(done) {
+        service.mqttClient.end(true,() => {
+            done();
+        })
+    });
+
+    it('app1 finish', function(done) {
+        app1.mqttClient.end(true,() => {
+            done();
+        })
+    });
+
+    it('app2 finish', function(done) {
+        app2.mqttClient.end(true,() => {
+            done();
+        })
+    });
+
+    it('gateway1 finish', function(done) {
+        gateway1.mqttClient.end(true,() => {
+            done();
+        })
+    });
+
+    it('gateway2 finish', function(done) {
+        gateway2.mqttClient.end(true,() => {
+            done();
+        })
     });
 });
