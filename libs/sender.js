@@ -22,7 +22,7 @@ class Sender {
 
             let to = () => {
                 mqttNode.removeAllListeners(uuid);
-                reject({reason:'timeout'});
+                reject('timeout');
             };
 
             mqttNode.on(uuid,(result) => {
