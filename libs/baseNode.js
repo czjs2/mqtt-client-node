@@ -50,7 +50,7 @@ class node extends EventEmitter {
     connect(address, options) {
         return new P((resolve,reject) => {
             this.mqttClient = mqtt.connect(address, {username: this.appToken, password: this.appScrect});
-            this.mqttClient.on('message',(topic,payload) => {
+            this.mqttClient.on('message',(topic, message) => {
                 let topicParser = topic.split('/');
 
                 let src = topicParser[1];
@@ -58,7 +58,7 @@ class node extends EventEmitter {
                 let channel = topicParser[3];
                 let cmd = topicParser[4];
 
-                let script = new vm.Script(" msg = " + payload.toString());
+                let script = new vm.Script(" msg = " + message.toString());
                 let obj = {};
                 try{
                     script.runInNewContext(obj);
@@ -69,13 +69,12 @@ class node extends EventEmitter {
 
                 let msg = obj.msg || {};
 
-                let data = {
+                let data = _.extend({
                     src: src,
                     tar: tar,
                     channel: channel,
-                    cmd: cmd,
-                    payload: msg.payload
-                };
+                    cmd: cmd
+                }, msg);
 
                 _.pullAt(topicParser,[0,1,2,3,4]);
                 let result = this.topic.parser(data, topicParser);

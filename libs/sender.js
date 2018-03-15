@@ -12,8 +12,8 @@ class Sender {
      * @param {string} channel eg.'$iot'
      * @param {string} cmd eg.'$req'
      * @param {string} customTopic eg.'/aaaa/bbbb'
-     * @param {object} payload eg.{}
-     * @param {object} options eg.{retain: false}
+     * @param {object/string} payload eg.{}
+     * @param {object} options eg.{timeout: 1000}
      * @return {Promise}.
      */
     sendRequest(mqttNode, src, tar, channel, cmd, customTopic, payload, options = {}) {
@@ -31,13 +31,7 @@ class Sender {
                 }
 
                 mqttNode.removeAllListeners(uuid);
-
-                if (_.has(result.payload,'$error')) {
-                    reject(result.payload['$error']);
-                }
-                else {
-                    resolve(result);
-                }
+                resolve(result);
             });
             let timer = setTimeout(to,options.timeout||5000);
 
@@ -45,7 +39,13 @@ class Sender {
             topic += customTopic;
             topic += `/${uuid}`;
 
-            mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options,(err) => {
+            let data = {};
+            data.payload = payload;
+            if (!_.isEmpty(options)) {
+                data.options = options;
+            }
+
+            mqttNode.mqttClient.publish(topic, JSON.stringify(data), {}, (err) => {
                 if (err) {
                     reject(err);
                 }
@@ -62,15 +62,23 @@ class Sender {
      * @param {string} channel eg.'$iot'
      * @param {string} cmd eg.'$req'
      * @param {string} customTopic eg.'/aaaa/bbbb'
-     * @param {object} payload eg.{}
-     * @param {object} options eg.{retain: false}
+     * @param {object/string} payload eg.{}
+     * @param {string} error eg.'error'
+     * @param {object} options eg.{type: s}
+     * @param {object} mqttOptions eg.{retain: false}
      * @return {Promise}.
      */
-    sendBroadcast(mqttNode, src, tar, channel, cmd, customTopic, payload, options = {}) {
+    sendBroadcast(mqttNode, src, tar, channel, cmd, customTopic, payload, error, options = {}, mqttOptions) {
         return new P((resolve, reject) => {
             let topic = `/${src}/${tar}/${channel}/${cmd}`;
             topic += customTopic;
-            mqttNode.mqttClient.publish(topic, JSON.stringify({payload:payload}), options, (err) => {
+
+            let data = error ? {error: error} : {payload: payload};
+            if (!_.isEmpty(options)) {
+                data.options = options;
+            }
+
+            mqttNode.mqttClient.publish(topic, JSON.stringify(data), mqttOptions, (err) => {
                 if (err) {
                     reject(err);
                 }

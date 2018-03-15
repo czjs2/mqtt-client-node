@@ -21,17 +21,25 @@ class App extends BaseNode {
      * @param {string} tar eg.'aaaa'
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
-     * @param {object} payload eg.{}
+     * @param {object/string} payload eg.{}
+     * @param {object} options eg.{timeout: 1000}
      * @return {Promise}.
      */
-    req({tar, channel, params, payload}) {
+    req({tar, channel, params, payload, options}) {
         channel = channel || this.channel;
-        let error = this.validate({src:"#",tar, channel, params});
-        if (error) {
-            return P.reject(error);
+        let validateError = this.validate({src:"#",tar, channel, params});
+        if (validateError) {
+            return P.reject(validateError);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendRequest(this, this.appToken, tar, channel, '$req', customTopic, payload);
+        return sender.sendRequest(this, this.appToken, tar, channel, '$req', customTopic, payload, options).then((result) => {
+            if (result.error) {
+                return P.reject(result.error);
+            }
+            else {
+                return P.resolve(result);
+            }
+        });
     }
 
     /**
@@ -41,18 +49,19 @@ class App extends BaseNode {
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
      * @param {string} messageId eg.'aaa'
-     * @param {object} payload eg.{}
+     * @param {object/string} payload eg.{}
+     * @param {object/string} error eg.'error'
      * @return {Promise}.
      */
-    rresp({tar, channel, params, messageId, payload}) {
+    rresp({tar, channel, params, messageId, payload, error}) {
         channel = channel || this.channel;
-        let error = this.validate({src:"#",tar, channel, params});
-        if (error) {
-            return P.reject(error);
+        let validateError = this.validate({src:"#",tar, channel, params});
+        if (validateError) {
+            return P.reject(validateError);
         }
         let customTopic = this.topic.combination(channel, params);
         customTopic += `/${messageId}`;
-        return sender.sendBroadcast(this, this.appToken, tar, channel, '$rresp', customTopic, payload);
+        return sender.sendBroadcast(this, this.appToken, tar, channel, '$rresp', customTopic, payload, error);
     }
 
     /**
@@ -61,36 +70,19 @@ class App extends BaseNode {
      * @param {string} channel eg.'$iot'
      * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
      * @param {object} payload eg.{}
-     * @param {object} options eg.{retain: false}
+     * @param {string} error eg.'error'
+     * @param {object/string} options eg.{type: s}
+     * @param {object} mqttOptions eg.{qos: 0, retain: 0}
      * @return {Promise}.
      */
-    update({channel, params, payload, options}) {
+    update({channel, params, payload, error, options}, mqttOptions = {qos: 0, retain: 0}) {
         channel = channel || this.channel;
-        let error = this.validate({tar: "#",src:"#", channel, params});
-        if (error) {
-            return P.reject(error);
+        let validateError = this.validate({tar: "#",src:"#", channel, params});
+        if (validateError) {
+            return P.reject(validateError);
         }
         let customTopic = this.topic.combination(channel, params);
-        return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, options);
-    };
-
-    /**
-     * 上报数据到service.
-     *
-     * @param {string} channel eg.'$iot'
-     * @param {object} params eg.{iotId: 'aaa', attribute: 'bbb'}
-     * @param {object} payload eg.{}
-     * @param {object} options eg.{retain: false}
-     * @return {Promise}.
-     */
-    event({channel, params, payload, options}) {
-        channel = channel || this.channel;
-        let error = this.validate({tar: "#",src:"#", channel, params});
-        if (error) {
-            return P.reject(error);
-        }
-        let customTopic = this.topic.combination(channel, params);
-        return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$event', customTopic, payload, options);
+        return sender.sendBroadcast(this, this.appToken, this.appToken, channel, '$update', customTopic, payload, error, options, mqttOptions);
     };
 
     /**
@@ -98,18 +90,12 @@ class App extends BaseNode {
      *
      * @param {string} attrs eg.{1: {type: 's', payload: 'aaa'}}
      * @param {object} params eg.{iotId: 'aaa'}
-     * @param {object} payload eg.'aaa'
-     * @param {object} options eg.{retain: false}
+     * @param {object} mqttOptions eg.{qos: 0, retain: 0}
      * @return {Promise}.
      */
-    soeIotAttrs({attrs, params, options}) {
-        let type = {
-            s: 'update',
-            e: 'event'
-        };
-
+    soeIotAttrs({attrs, params},mqttOptions) {
         _.each(attrs, (item, key) => {
-            this[type[item.type]]({channel: '$iot', params: {iotId: params.iotId, attribute: key}, payload: item.payload, options});
+            this.update({channel: '$iot', params: {iotId: params.iotId, attribute: key}, payload: item.payload, options: {type: item.type}},mqttOptions);
         });
     };
 }

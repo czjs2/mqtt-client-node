@@ -76,37 +76,72 @@ describe('update', function() {
         gateway1.update({
             channel: '$iot',
             params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        });
+    });
+
+    it('update(gateway1 -> service error)', function(done) {
+        service.removeAllListeners('$update');
+        service.on('$update',(result) => {
+            if (result.error) {
+                done();
+            }
+            else {
+                done(new Error('must error'));
+            }
+        });
+
+        gateway1.update({
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
             payload: message.payload,
-            options: {}
+            error: 'error'
         });
     });
 });
 
 describe('soeIotAttrs', function() {
-    it('soeIotAttrs', function(done) {
-        service.removeAllListeners('$event');
-        service.on('$event',(result) => {
-            if (result.payload == 'bbb') {
+    it('soeIotAttrs status', function(done) {
+        service.removeAllListeners('$update');
+        service.on('$update',(result) => {
+            if (result.options.type == 's') {
                 done();
             }
             else {
-                done(new Error('payload is difference'));
+                done(new Error('type is not s'));
             }
         });
 
         app1.soeIotAttrs({
             attrs: {
                 "1":{   //属性
-                    "type": "s", //数据类型 状态或是事件型
-                    payload: 'aaa'  //值内容
-                },
-                "2":{   //属性
+                    type: "s", //数据类型 状态或是事件型
+                    payload: 'bbb'  //值内容
+                }
+            },
+            params: {iotId: 'aaaa'}
+        })
+    });
+
+    it('soeIotAttrs event', function(done) {
+        service.removeAllListeners('$update');
+        service.on('$update',(result) => {
+            if (result.options.type == 'e') {
+                done();
+            }
+            else {
+                done(new Error('type is not e'));
+            }
+        });
+
+        app1.soeIotAttrs({
+            attrs: {
+                "1":{   //属性
                     type: "e", //数据类型 状态或是事件型
                     payload: 'bbb'  //值内容
-                },
+                }
             },
-            params: {iotId: 'aaaa'},
-            options: {}
+            params: {iotId: 'aaaa'}
         })
     });
 });
@@ -128,65 +163,13 @@ describe('notify', function() {
             src: service.appToken,
             channel: '$iot',
             params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload,
-            options: {}
-        });
-    });
-
-    it('notify(service -> app1 and app2)', function(done) {
-        app1.removeAllListeners('$notify');
-        app2.removeAllListeners('$notify');
-        service.removeAllListeners('$update');
-        app1.on('$notify',(result) => {
-            if (result.payload.value == message.payload.value) {
-                done();
-            }
-            else {
-                done(new Error('value is difference'));
-            }
-        });
-        app2.on('$notify',(result) => {
-            if (result.payload.value == message.payload.value) {
-                done();
-            }
-            else {
-                done(new Error('value is difference'));
-            }
-        });
-
-        service.on('$update',(result) => {
-            if (result.payload.value == message.payload.value) {
-                service.notify({
-                    tar: result.payload.appToken,
-                    src: result.src,
-                    channel: '$iot',
-                    params: result.params,
-                    payload: result.payload,
-                    options: {}
-                });
-            }
-            else {
-                done(new Error('value is difference'));
-            }
-        });
-
-        gateway1.update({
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: {value: message.payload.value, appToken: app1.appToken},
-            options: {}
-        });
-        gateway2.update({
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: {value: message.payload.value, appToken: app2.appToken},
-            options: {}
+            payload: message.payload
         });
     });
 });
 
 describe('req->rreq->rresp->resp', function() {
-    it('req success', function(done) {
+    it('req', function(done) {
         service.removeAllListeners('$req');
         service.on('$req',(result) => {
             service.resp(result);
@@ -212,7 +195,7 @@ describe('req->rreq->rresp->resp', function() {
     it('req error', function(done) {
         service.removeAllListeners('$req');
         service.on('$req',(result) => {
-            result.payload = {$error: 'error'};
+            result.error = 'error';
             service.resp(result);
         });
 
@@ -228,7 +211,7 @@ describe('req->rreq->rresp->resp', function() {
         });
     });
 
-    it('rreq success', function(done) {
+    it('rreq', function(done) {
         app2.removeAllListeners('$rreq');
         app2.on('$rreq',(result) => {
             app2.rresp(result);
@@ -252,26 +235,6 @@ describe('req->rreq->rresp->resp', function() {
         });
     });
 
-    it('rreq error', function(done) {
-        app2.removeAllListeners('$rreq');
-        app2.on('$rreq',(result) => {
-            result.payload = {$error: 'error'};
-            app2.rresp(result);
-        });
-
-        service.rreq({
-            tar: app2.appToken,
-            src: service.appToken,
-            channel: '$iot',
-            params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload
-        }).then((result) => {
-            done(new Error('must error'));
-        }).catch((e) => {
-            done();
-        });
-    });
-
     it('req->rreq->rresp->resp', function(done) {
         app2.removeAllListeners('$rreq');
         service.removeAllListeners('$req');
@@ -291,7 +254,8 @@ describe('req->rreq->rresp->resp', function() {
             tar: app2.appToken,
             channel: '$iot',
             params: {iotId: message.iotId, attribute: message.attribute},
-            payload: message.payload
+            payload: message.payload,
+            options: {timeout: 10000}
         }).then((result) => {
             if (result.payload.value == message.payload.value) {
                 done();
@@ -301,6 +265,34 @@ describe('req->rreq->rresp->resp', function() {
             }
         }).catch((e) => {
             console.log(e);
+        });
+    });
+
+    it('req->rreq->rresp->resp error', function(done) {
+        app2.removeAllListeners('$rreq');
+        service.removeAllListeners('$req');
+
+        service.on('$req',(result) => {
+            service.rreq(result).then((obj) => {
+                obj.messageId = result.messageId;
+                service.resp(obj);
+            });
+        });
+
+        app2.on('$rreq',(result) => {
+            result.error = 'error2';
+            app2.rresp(result);
+        });
+
+        app1.req({
+            tar: app2.appToken,
+            channel: '$iot',
+            params: {iotId: message.iotId, attribute: message.attribute},
+            payload: message.payload
+        }).then((result) => {
+            done(new Error('must error'));
+        }).catch((e) => {
+            done();
         });
     });
 
