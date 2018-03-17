@@ -48,64 +48,62 @@ class node extends EventEmitter {
      * @return {Promise}.
      */
     connect(address, options = {}) {
-        return new P((resolve,reject) => {
-            options.username = this.appToken;
-            options.password = this.appScrect;
+        options.username = this.appToken;
+        options.password = this.appScrect;
 
-            this.mqttClient = mqtt.connect(address, options);
-            this.mqttClient.on('message',(topic, message) => {
-                let topicParser = topic.split('/');
+        this.mqttClient = mqtt.connect(address, options);
+        this.mqttClient.on('message',(topic, message) => {
+            let topicParser = topic.split('/');
 
-                let src = topicParser[1];
-                let tar = topicParser[2];
-                let channel = topicParser[3];
-                let cmd = topicParser[4];
+            let src = topicParser[1];
+            let tar = topicParser[2];
+            let channel = topicParser[3];
+            let cmd = topicParser[4];
 
-                let script = new vm.Script(" msg = " + message.toString());
-                let obj = {};
-                try{
-                    script.runInNewContext(obj);
-                }
-                catch (e){
-                    console.log(e);
-                }
+            let script = new vm.Script(" msg = " + message.toString());
+            let obj = {};
+            try{
+                script.runInNewContext(obj);
+            }
+            catch (e){
+                console.log(e);
+            }
 
-                let msg = obj.msg || {};
+            let msg = obj.msg || {};
 
-                let data = _.extend({
-                    src: src,
-                    tar: tar,
-                    channel: channel,
-                    cmd: cmd
-                }, msg);
+            let data = _.extend({
+                src: src,
+                tar: tar,
+                channel: channel,
+                cmd: cmd
+            }, msg);
 
-                _.pullAt(topicParser,[0,1,2,3,4]);
-                let result = this.topic.parser(data, topicParser);
+            _.pullAt(topicParser,[0,1,2,3,4]);
+            let result = this.topic.parser(data, topicParser);
 
-                if (cmd == '$resp' || cmd == '$rresp') {
-                    this.emit(result.messageId, result);
-                }
-                this.emit(channel, result);
-                this.emit(cmd, result);
-                this.emit(channel+'-'+cmd, result);
-            });
+            if (cmd == '$resp' || cmd == '$rresp') {
+                this.emit(result.messageId, result);
+            }
+            this.emit(channel, result);
+            this.emit(cmd, result);
+            this.emit(channel+'-'+cmd, result);
+        });
 
-            this.mqttClient.on('connect',(e) => {
-                this.mqttClient.subscribe(this.subscribePatterns);
-                resolve(this);
-            });
+        this.mqttClient.on('connect',(e) => {
+            this.mqttClient.subscribe(this.subscribePatterns);
+            this.emit('mqtt-connect');
+        });
 
-            this.mqttClient.on('reconnect',(e) => {
-                this.emit('mqttReconnect');
-            });
+        this.mqttClient.on('reconnect',(e) => {
+            this.emit('mqtt-reconnect');
+        });
 
-            this.mqttClient.on('error',(e) => {
-                if (e.code == 5) {
-                    this.emit('noAuth');
-                }
-                this.emit('mqttError',e);
-            });
-        })
+        this.mqttClient.on('error',(e) => {
+            if (e.code == 5) {
+                this.emit('no-auth');
+            }
+            this.emit('mqtt-error',e);
+        });
     }
 
     /**
