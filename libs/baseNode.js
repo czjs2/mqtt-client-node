@@ -47,9 +47,12 @@ class node extends EventEmitter {
      * @param {object} options eg.{}
      * @return {Promise}.
      */
-    connect(address, options) {
+    connect(address, options = {}) {
         return new P((resolve,reject) => {
-            this.mqttClient = mqtt.connect(address, {username: this.appToken, password: this.appScrect});
+            options.username = this.appToken;
+            options.password = this.appScrect;
+
+            this.mqttClient = mqtt.connect(address, options);
             this.mqttClient.on('message',(topic, message) => {
                 let topicParser = topic.split('/');
 
@@ -87,11 +90,34 @@ class node extends EventEmitter {
                 this.emit(channel+'-'+cmd, result);
             });
 
-            this.mqttClient.on('connect',() => {
+            this.mqttClient.on('connect',(e) => {
                 this.mqttClient.subscribe(this.subscribePatterns);
                 resolve(this);
             });
+
+            this.mqttClient.on('reconnect',(e) => {
+                this.emit('mqttReconnect');
+            });
+
+            this.mqttClient.on('error',(e) => {
+                if (e.code == 5) {
+                    this.emit('noAuth');
+                }
+                this.emit('mqttError',e);
+            });
         })
+    }
+
+    /**
+     * mqttClient结束进程
+     *
+     * @param {bool} force eg.true/false
+     * @param {function} cb eg.()=>{}
+     */
+    end(force, cb) {
+        if (this.mqttClient) {
+            this.mqttClient.end(force, cb);
+        }
     }
 }
 
