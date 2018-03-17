@@ -27,37 +27,42 @@ describe('server', function() {
 
 describe('service connect', function() {
     it('service connect', function (done) {
-        service.connect('mqtt://localhost').then(() => {
+        service.on('mqtt-connect',() => {
             done();
         });
+        service.connect('mqtt://localhost');
     });
 });
 
 describe('app connect', function() {
     it('app1 connect', function (done) {
-        app1.connect('mqtt://localhost').then(() => {
+        app1.on('mqtt-connect',() => {
             done();
         });
+        app1.connect('mqtt://localhost');
     });
 
     it('app2 connect', function(done) {
-        app2.connect('mqtt://localhost').then(() => {
+        app2.on('mqtt-connect',() => {
             done();
         });
+        app2.connect('mqtt://localhost');
     });
 });
 
 describe('gateway connect', function() {
     it('gateway1 connect', function(done) {
-        gateway1.connect('mqtt://localhost').then(() => {
+        gateway1.on('mqtt-connect',() => {
             done();
         });
+        gateway1.connect('mqtt://localhost');
     });
 
     it('gateway2 connect', function(done) {
-        gateway2.connect('mqtt://localhost').then(() => {
+        gateway2.on('mqtt-connect',() => {
             done();
         });
+        gateway2.connect('mqtt://localhost');
     });
 });
 
@@ -336,32 +341,42 @@ describe('req->rreq->rresp->resp', function() {
 
 describe('finish', function() {
     it('service finish', function(done) {
-        service.mqttClient.end(true,() => {
+        service.end().then(() => {
             done();
-        })
+        }).catch((e) => {
+            done(new Error(e));
+        });
     });
 
     it('app1 finish', function(done) {
-        app1.mqttClient.end(true,() => {
+        app1.end().then(() => {
             done();
-        })
+        }).catch((e) => {
+            done(new Error(e));
+        });
     });
 
     it('app2 finish', function(done) {
-        app2.mqttClient.end(true,() => {
+        app2.end().then(() => {
             done();
-        })
+        }).catch((e) => {
+            done(new Error(e));
+        });
     });
 
     it('gateway1 finish', function(done) {
-        gateway1.mqttClient.end(true,() => {
+        gateway1.end().then(() => {
             done();
-        })
+        }).catch((e) => {
+            done(new Error(e));
+        });
     });
 
     it('gateway2 finish', function(done) {
-        gateway2.mqttClient.end(true,() => {
+        gateway2.end().then(() => {
             done();
-        })
+        }).catch((e) => {
+            done(new Error(e));
+        });
     });
 });

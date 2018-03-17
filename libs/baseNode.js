@@ -116,13 +116,16 @@ class node extends EventEmitter {
      *
      * @param {function} cb eg.()=>{}
      */
-    end(cb) {
+    end() {
         if (this.mqttClient) {
-            this.mqttClient.end(true, () => {
-                this.removeAllListeners();
-                cb();
+            return new P((resolve) => {
+                this.mqttClient.end(true, () => {
+                    this.removeAllListeners();
+                    resolve();
+                });
             });
         }
+        return P.reject('mqttClient is null');
     }
 }
 
