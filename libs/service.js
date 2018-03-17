@@ -15,6 +15,16 @@ class Service extends BaseNode {
         this.channel = channel;
     }
 
+    init(appToken, appScrect, channel) {
+        super.init(appToken, appScrect);
+        this.channel = channel;
+        this.subscribePatterns  = [
+            `/+/+/${channel || '+'}/$update/#`,
+            `/+/+/${channel || '+'}/$rresp/#`,
+            `/+/+/${channel || '+'}/$req/#`
+        ];
+    }
+
     /**
      * service监听req，发送rreq.
      *

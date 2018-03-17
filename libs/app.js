@@ -15,6 +15,16 @@ class App extends BaseNode {
         this.channel = channel;
     }
 
+    init(appToken, appScrect, channel) {
+        super.init(appToken, appScrect);
+        this.channel = channel;
+        this.subscribePatterns  = [
+            `/${appToken}/+/${channel || '+'}/$resp/#`,
+            `/${appToken}/+/${channel || '+'}/$rreq/#`,
+            `/${appToken}/+/${channel || '+'}/$notify/#`
+        ];
+    }
+
     /**
      * 发送req请求到service.
      *

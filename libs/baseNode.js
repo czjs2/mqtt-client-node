@@ -17,6 +17,11 @@ class node extends EventEmitter {
         this.topic = new Topic();
     }
 
+    init(appToken, appScrect) {
+        this.appToken = appToken;
+        this.appScrect = appScrect;
+    }
+
     /**
      * 验证器,验证tar, src, channel, params的值是否是空的
      */
@@ -100,7 +105,7 @@ class node extends EventEmitter {
 
         this.mqttClient.on('error',(e) => {
             if (e.code == 5) {
-                this.emit('no-auth');
+                this.emit('mqtt-no-auth');
             }
             this.emit('mqtt-error',e);
         });
@@ -109,12 +114,14 @@ class node extends EventEmitter {
     /**
      * mqttClient结束进程
      *
-     * @param {bool} force eg.true/false
      * @param {function} cb eg.()=>{}
      */
-    end(force, cb) {
+    end(cb) {
         if (this.mqttClient) {
-            this.mqttClient.end(force, cb);
+            this.mqttClient.end(true, () => {
+                this.removeAllListeners();
+                cb();
+            });
         }
     }
 }
