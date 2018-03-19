@@ -25,25 +25,27 @@ npm install mqtt-client-node --save
 ```javascript
 const App = require('mqtt-client-node').app;
 const app = new App('appToken','appScrect');
+//如果你只想订阅有关$iot的消息
+//const app = new App('appToken','appScrect','$iot');
 
 app.connect('mqtt://localhost').then(() => {
   console.log('connect success');
-});
 
-app.req({tar: 'tar_appToken', channel: '$iot', payload:{value: 'test'}}).then((result) => {
-  console.log(result);
-})
+  app.req({tar: 'tar_appToken', channel: '$iot', payload:{value: 'test'}}).then((result) => {
+    console.log(result);
+  });
+});
 
 const Service = require('mqtt-client-node').service;
 const service = new Service('appToken','appScrect');
 
 service.connect('mqtt://localhost').then(() => {
   console.log('connect success');
-});
 
-service.notify({tar: 'tar_appToken', src: 'src_appToken', channel: '$iot', payload:{value: 'test'}}).then((result) => {
-  console.log(result);
-})
+  service.notify({tar: 'tar_appToken', src: 'src_appToken', channel: '$iot', payload:{value: 'test'}}).then((result) => {
+    console.log(result);
+  });
+});
 ```
 
 ## api
