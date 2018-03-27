@@ -11,9 +11,9 @@ topic: '/appToken/tar_appToken/channel/cmd/#'
 | :------------- |:-------------|
 | appToken | 应用的appToken |
 | tar_appToken | 目标appToken |
-| channel | 目前只有'$iot','$circle' |
+| channel | 目前只有'$iot','$manager' |
 | cmd | '$update','$notify','$req','$rreq','$resp','$rresp' |
-| # | 自定义层，根据不同的channel产生不同的结果，列：channel='$iot'，自定义层可能为'/iotId/attribute/messageId'或'/iotId/attribute'。channel='$circle'，自定义层可能为'/circleId/messageId'或'/circleId' |
+| # | 自定义层，根据不同的channel产生不同的结果，列：channel='$iot'，自定义层可能为'/iotId/attribute/messageId'或'/iotId/attribute'。 |
 
 ## 安装
 

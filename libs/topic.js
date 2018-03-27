@@ -5,7 +5,7 @@ class Topic {
     constructor() {
         this.topicRule = {
             $iot: ['iotId','attribute'],
-            $circle: ['circleId']
+            $manager: ['class','action']
         };
     }
 

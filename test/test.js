@@ -66,6 +66,38 @@ describe('gateway connect', function() {
     });
 });
 
+describe('add circle', function() {
+    it('add circle', function(done) {
+        service.removeAllListeners('$req');
+        service.on('$req',(result) => {
+            if (result.params.action == 'add' && result.payload.iotId == '1234') {
+                result.tar = gateway1.appToken;
+                result.src = service.appToken;
+                service.resp(result);
+            }
+            else {
+                done(new Error('value is difference'));
+            }
+        });
+
+        gateway1.req({
+            tar: service.appToken,
+            channel: '$manager',
+            params: {class: 'iot', action: 'add'},
+            payload: {
+                iotId: '1234'
+            }
+        }).then((result) => {
+            if (result.params.action == 'add' && result.payload.iotId == '1234') {
+                done();
+            }
+            else {
+                done(new Error('value is difference'));
+            }
+        });
+    });
+});
+
 describe('update', function() {
     it('update(gateway1 -> service)', function(done) {
         service.removeAllListeners('$update');
