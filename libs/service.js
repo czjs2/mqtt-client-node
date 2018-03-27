@@ -5,20 +5,24 @@ const BaseNode = require('./baseNode');
 
 class Service extends BaseNode {
 
-    constructor(appToken, appScrect, channel) {
-        let subscribePatterns = [
+    constructor(appToken, appScrect, options = {}) {
+        options = _.isObject(options) ? options : {};
+        const {channel,subscribePatterns} = options;
+        options.subscribePatterns = subscribePatterns || [
             `/+/+/${channel || '+'}/$update/#`,
             `/+/+/${channel || '+'}/$rresp/#`,
             `/+/+/${channel || '+'}/$req/#`
         ];
-        super(appToken, appScrect, subscribePatterns);
+        super(appToken, appScrect, options);
         this.channel = channel;
     }
 
-    init(appToken, appScrect, channel) {
-        super.init(appToken, appScrect);
+    init(appToken, appScrect, options = {}) {
+        options = _.isObject(options) ? options : {};
+        super.init(appToken, appScrect, options);
+        const {channel,subscribePatterns} = options;
         this.channel = channel;
-        this.subscribePatterns  = [
+        this.subscribePatterns = subscribePatterns || [
             `/+/+/${channel || '+'}/$update/#`,
             `/+/+/${channel || '+'}/$rresp/#`,
             `/+/+/${channel || '+'}/$req/#`

@@ -3,7 +3,7 @@ const P = require('bluebird');
 const Service = require('../index').service;
 const App = require('../index').app;
 
-const service = new Service('aaaa','bbbb');
+const service = new Service('aaaa','bbbb','aaaaa');
 const app1 = new App('aaaa1','bbbb1');
 const app2 = new App('aaaa2','bbbb2');
 const gateway1 = new App('aaaaa1','bbbbb1');
@@ -368,6 +368,26 @@ describe('req->rreq->rresp->resp', function() {
                 }
             });
         }
+    });
+});
+
+describe('custom', function() {
+    it('custom topic', function(done) {
+        service.removeAllListeners('$update');
+        service.on('$update',(result) => {
+            if (result.params[0] == 'aaa' && result.params[1] == 'move' && result.payload == 'asdfgh') {
+                done();
+            }
+            else {
+                done(new Error('value is difference'));
+            }
+        });
+
+        gateway1.update({
+            channel: '$custom',
+            params: {id: 'aaa', action: 'move'},
+            payload: 'asdfgh'
+        });
     });
 });
 

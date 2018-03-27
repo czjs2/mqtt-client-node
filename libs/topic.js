@@ -2,8 +2,8 @@ const _ = require('lodash');
 
 class Topic {
 
-    constructor() {
-        this.topicRule = {
+    constructor(topicRule) {
+        this.topicRule = topicRule || {
             $iot: ['iotId','attribute'],
             $manager: ['class','action']
         };
@@ -17,8 +17,12 @@ class Topic {
      * @return {object}. eg.{iotId: 'aaa', attribute: 'bbb'}
      */
     parser(data, topicParser) {
-        let rule = this.topicRule[data.channel];
+        let rule = this.topicRule[data.channel] || [];
         data.params = {};
+
+        _.each(topicParser, (item, index) => {
+            data.params[index] = item;
+        });
 
         _.each(rule,(item, index) => {
             data.params[item] = topicParser[index];
@@ -36,14 +40,21 @@ class Topic {
      * @return {string}. eg.'/aaa/bbb'
      */
     combination(channel, payload) {
-        let rule = this.topicRule[channel];
+        let rule = this.topicRule[channel] || [];
         let result = '';
 
-        _.each(rule, (item) => {
-            if (payload[item]) {
-                result += `/${payload[item]}`;
-            }
-        });
+        if (_.isEmpty(rule)) {
+            _.each(payload, (item) => {
+                result += `/${item}`;
+            });
+        }
+        else {
+            _.each(rule, (item) => {
+                if (payload[item]) {
+                    result += `/${payload[item]}`;
+                }
+            });
+        }
 
         return result;
     }

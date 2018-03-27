@@ -8,18 +8,21 @@ const Topic = require('./topic');
 
 class node extends EventEmitter {
 
-    constructor(appToken, appScrect, subscribePatterns) {
+    constructor(appToken, appScrect, options = {}) {
         super();
+        const {topicRule, subscribePatterns} = options;
         this.appToken = appToken;
         this.appScrect = appScrect;
         this.mqttClient = null;
         this.subscribePatterns = subscribePatterns || [`/${appToken}/#`];
-        this.topic = new Topic();
+        this.topic = new Topic(topicRule);
     }
 
-    init(appToken, appScrect) {
+    init(appToken, appScrect, options = {}) {
+        const {topicRule} = options;
         this.appToken = appToken;
         this.appScrect = appScrect;
+        this.topic = new Topic(topicRule);
     }
 
     /**

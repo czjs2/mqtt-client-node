@@ -49,7 +49,7 @@ service.connect('mqtt://localhost').then(() => {
 ```
 
 ## api
-* <a href="#connect"><code>init()</code></a>
+* <a href="#init"><code>init()</code></a>
 * <a href="#connect"><code>connect()</code></a>
 * <a href="#req"><code>app.<b>req()</b></code></a>
 * <a href="#rresp"><code>app.<b>rresp()</b></code></a>
@@ -60,11 +60,14 @@ service.connect('mqtt://localhost').then(() => {
 * <a href="#notify"><code>service.<b>notify()</b></code></a>
 
 <a name="init"></a>
-### init(appToken, appScrect, [channel])
+### init(appToken, appScrect, [options])
 对连接mqtt总线验证的数据进行初始化。
 * appToken 注册应用的appToken
 * appScrect 注册应用的appScrect
-* channel 需要订阅的对象$iot/$circle。这个是选择项。
+* options 配置项。这个是选择项。
+    *channel 需要订阅的对象$iot/$circle
+    *topicRule topic规则
+    *subscribePatterns 订阅对象
 
 <a name="connect"></a>
 ### connect(address, [options])
