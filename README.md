@@ -65,9 +65,9 @@ service.connect('mqtt://localhost').then(() => {
 * appToken 注册应用的appToken
 * appScrect 注册应用的appScrect
 * options 配置项。这个是选择项。
-    *channel 需要订阅的对象$iot/$circle
-    *topicRule topic规则
-    *subscribePatterns 订阅对象
+    * channel 需要订阅的对象$iot/$manager
+    * topicRule topic规则
+    * subscribePatterns 订阅对象
 
 <a name="connect"></a>
 ### connect(address, [options])
@@ -79,8 +79,8 @@ service.connect('mqtt://localhost').then(() => {
 ### app.req({tar, channel, params, [payload], [options]})
 app向service发送请求，获取tar的返回的数据。
 * tar 目标应用的appToken
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * payload 传输的数据体。这个是选择项。
 * options {timeout: 1000}。这个是选择项。
 
@@ -88,8 +88,8 @@ app向service发送请求，获取tar的返回的数据。
 ### app.rresp({tar, channel, params, messageId, [payload], [error]})
 app向service发送tar的需要的数据。
 * tar 目标应用的appToken
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * messageId service发送rreq生成的messageId
 * payload 传输的数据体。这个是选择项。
 * error 错误信息 eg.'error message'。这个是选择项。
@@ -97,8 +97,8 @@ app向service发送tar的需要的数据。
 <a name="update"></a>
 ### app.update({channel, params, [payload], [error], [options]}, [mqttOptions])
 app上报数据给service。
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * payload 传输的数据体。这个是选择项。
 * options {type: 's'}。这个是选择项。
 * mqttOptions mqtt.publish配置，见[mqtt.publish()](https://github.com/mqttjs/MQTT.js#publish)。这个是选择项。
@@ -115,8 +115,8 @@ iot设备上报数据给service。
 service向tar发送rreq请求，获取tar的返回的数据。
 * tar 目标应用的appToken
 * src 发送req请求来源的appToken
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * payload 传输的数据体。这个是选择项。
 * options {timeout: 1000}。这个是选择项。
 
@@ -125,8 +125,8 @@ service向tar发送rreq请求，获取tar的返回的数据。
 service向tar发送src返回的数据。
 * tar 目标应用的appToken
 * src rreq接收返回数据来源的appToken
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * messageId 接收req来源的messageId
 * payload 传输的数据体。这个是选择项。
 * error 错误信息 eg.'error message'。这个是选择项。
@@ -136,8 +136,8 @@ service向tar发送src返回的数据。
 service向tar发送通知。
 * tar 目标应用的appToken
 * src 来源的appToken
-* channel '$iot','$circle'
-* params '$iot': {'iotId','attribute'}, '$circle': {'circleId'}
+* channel '$iot','$manager'
+* params '$iot': {'iotId','attribute'}, '$manager': {'class','action'}
 * payload 传输的数据体。这个是选择项。
 * error 错误信息 eg.'error message'。这个是选择项。
 * options {type: 's'}。这个是选择项。
