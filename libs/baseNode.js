@@ -124,7 +124,7 @@ class node extends EventEmitter {
             return new P((resolve,reject) => {
                 let complete_handler = setTimeout(() => {
                     reject('end timeout');
-                },timeout||2000);
+                },timeout||200);
 
                 this.mqttClient.end(true, () => {
                     clearTimeout(complete_handler);
